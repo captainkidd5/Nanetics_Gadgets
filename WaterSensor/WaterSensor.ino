@@ -2,7 +2,10 @@
 #include <ArduinoJson.hpp>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
-#include <ESPmDNS.h>
+#include <BluetoothSerial.h>
+
+
+BluetoothSerial SerialBT;
 const char* ssid = "ravioligivemethewifioli";
 const char* password = "DirtySocks4321";
 WiFiClientSecure client;
@@ -101,17 +104,19 @@ void Post() {
    }
 }
 
-//from cmd: ping esp32.local
-void setAsDiscoverable(){
-  if(MDNS.begin("esp32")){
-    Serial.println("mDNS responder started");
-  }
-  else
-  {
-    Serial.println("Error setting up mDNS responder");
-  }
-}
 
+
+void discoverableBTLoop(){
+if (Serial.available())
+  {
+    SerialBT.write(Serial.read());
+  }
+  if (SerialBT.available())
+  {
+    Serial.write(SerialBT.read());
+  }
+  delay(20);
+}
 
 void setup() {
   // Initialize serial and wait for port to open:
@@ -131,23 +136,24 @@ void setup() {
   Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
 
-  setAsDiscoverable();
+  SerialBT.begin("ESP32"); // Name of the device
+  Serial.println("The device started in discoverable mode, make sure your iPhone's Bluetooth is turned on.");
   Serial.flush();
-}
 
+}
   void loop() {
-
-if (WiFi.status() == WL_CONNECTED) {
-    delay(10000);
+discoverableBTLoop();
+// if (WiFi.status() == WL_CONNECTED) {
+//     delay(10000);
    
-     client.setCACert(root_ca);
-   //Post();
-  // Get();
+//      client.setCACert(root_ca);
+//    //Post();
+//   // Get();
 
 
-}
-else {
-    Serial.println("WiFi Disconnected");
-  }
+// }
+// else {
+//     Serial.println("WiFi Disconnected");
+//   }
 
 }
