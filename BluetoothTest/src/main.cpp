@@ -38,14 +38,14 @@ void setup() {
 String password = WiFi.psk();
 setupWifiConnection(ssid, password);
 SetupServerCredentials(serverName);
-azureIotConnection::setupIotConnection();
+setupIotConnection();
   }
 }
 
 void loop() {
     if(hasWifiCredentials){
         apiLoop(wifiClient);
-        MyClass::IotLoop();
+        IotLoop();
     }
     // put your main code here, to run repeatedly:
 }

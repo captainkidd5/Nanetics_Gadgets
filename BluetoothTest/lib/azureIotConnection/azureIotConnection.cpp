@@ -355,9 +355,9 @@ static void sendTelemetry()
 
 // Arduino setup and loop main functions.
 
-static void setupIotConnection() { establishConnection(); }
+void setupIotConnection() { establishConnection(); }
 
-static void IotLoop()
+void IotLoop()
 {
   if (WiFi.status() != WL_CONNECTED)
   {
