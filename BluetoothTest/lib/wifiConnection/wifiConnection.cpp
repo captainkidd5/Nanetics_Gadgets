@@ -10,7 +10,7 @@ void setupWifi() {
     // put your setup code here, to run once:
     Serial.begin(9600);
 
-Serial.write("Firing up");
+Serial.write("Attempting to connect to wifi...");
     //WiFiManager, Local intialization. Once its business is done, there is no need to keep it around
     WiFiManager wm;
 

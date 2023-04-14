@@ -4,10 +4,10 @@
 #include <ServerConnection.h>
 #include <WiFiClientSecure.h>
 #include <azureIotConnection.h>
-
+#include <Preferences.h>
 
 WiFiClientSecure wifiClient;
-const char* serverName = "naneticsapi.azurewebsites.net";
+
 
 
 void setupWifiConnection(String wifiName, String wifiPass) {
@@ -32,14 +32,17 @@ void setupWifiConnection(String wifiName, String wifiPass) {
 }
 
 void setup() {
-  setupWifi();
   if(hasWifiCredentials){
     String ssid = WiFi.SSID();
 String password = WiFi.psk();
-setupWifiConnection(ssid, password);
-SetupServerCredentials(serverName);
-setupIotConnection();
+
   }
+  else{
+  setupWifi();
+
+  }
+  setupWifiConnection(ssid, password);
+setupIotConnection();
 }
 
 void loop() {
