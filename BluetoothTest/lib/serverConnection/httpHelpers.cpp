@@ -10,7 +10,6 @@ DynamicJsonDocument deserialize(String response)
     {
         Serial.print("deserializeJson() failed: ");
         Serial.println(error.c_str());
-        return;
     }
     return doc;
 }

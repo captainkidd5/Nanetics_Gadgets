@@ -1,7 +1,8 @@
 
-const char* serverUri = "naneticsapi.azurewebsites.net";
-const int serverPort = 443;
-const char* root_ca= \
+
+#define serverUri "naneticsapi.azurewebsites.net"
+#define serverPort  443
+#define root_ca \
 "-----BEGIN CERTIFICATE-----\n" \
 "MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh\n" \
 "MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\n" \
@@ -23,4 +24,4 @@ const char* root_ca= \
 "8rGOmaFvE7FBcf6IKshPECBV1/MUReXgRPTqh5Uykw7+U0b6LJ3/iyK5S9kJRaTe\n" \
 "pLiaWN0bfVKfjllDiIGknibVb63dDcY3fe0Dkhvld1927jyNxF1WW6LZZm6zNTfl\n" \
 "MrY=\n" \
-"-----END CERTIFICATE-----\n";
+"-----END CERTIFICATE-----\n"

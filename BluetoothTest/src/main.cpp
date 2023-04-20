@@ -32,23 +32,20 @@ void setupWifiConnection(String wifiName, String wifiPass) {
 }
 
 void setup() {
-  if(hasWifiCredentials){
-    String ssid = WiFi.SSID();
-String password = WiFi.psk();
-
-  }
-  else{
+  if(!hasWifiCredentials){
+ 
   setupWifi();
 
   }
-  setupWifiConnection(ssid, password);
+ 
+  setupWifiConnection(WiFi.SSID(), WiFi.psk());
 setupIotConnection();
 }
 
 void loop() {
     if(hasWifiCredentials){
         apiLoop(wifiClient);
-        IotLoop();
+        //IotLoop();
     }
     // put your main code here, to run repeatedly:
 }
