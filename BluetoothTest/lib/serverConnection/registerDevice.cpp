@@ -11,20 +11,15 @@
 void postRegisterDevice(WiFiClientSecure &client)
 {
 
-  client.setTimeout(30000); // 30 seconds timeout
-  // need to use 443 for https
+  client.setTimeout(30000);
   int conn = client.connect(serverUri, serverPort);
-
   if (conn == 1)
   {
-
     try
     {
-
       Serial.println();
       Serial.print("Sending JSON body...");
-      // Prepare the JSON payload
-      const size_t capacity = JSON_OBJECT_SIZE(1) + 20;
+      const size_t capacity = JSON_OBJECT_SIZE(1) + 48;
       DynamicJsonDocument doc(capacity);
       String macAddress = String(ESP.getEfuseMac());
       Serial.println("Hardware id is " + macAddress);
@@ -34,8 +29,9 @@ void postRegisterDevice(WiFiClientSecure &client)
       serializeJson(doc, payload);
       // Request
       Serial.println("Sending payload...");
-
-      client.println("POST https://naneticsapi.azurewebsites.net/Devices/RegistrationRequest HTTP/1.0");
+      String uri = serverUri;
+      uri = "https://" + uri;
+      client.println("POST " + uri + "/Devices/RegistrationRequest HTTP/1.1");
       client.println(String("Host: ") + serverUri);
       client.println(F("Connection: close"));
       client.println("Content-Type: application/json");
@@ -43,22 +39,94 @@ void postRegisterDevice(WiFiClientSecure &client)
       client.println(payload.length());
       client.println();
       client.println(payload);
-
+      bool contentIsPlainText = false;
+      CustomContentType contentType = CustomContentType::None;
       while (client.connected())
       {
         String line = client.readStringUntil('\n'); // HTTP headers
+        // Serial.println(line);
         if (line == "\r")
         {
-          break;
+          if (contentIsPlainText)
+          {
+            break;
+          }
+        }
+        if (line.startsWith("HTTP/1."))
+        {
+          int statusCode = line.substring(line.indexOf(' ') + 1, line.indexOf(' ') + 4).toInt();
+          Serial.println("Response code: " + String(statusCode));
+          if (isSuccessCode(statusCode))
+          {
+            Serial.println("Request successful!");
+            contentIsPlainText = true;
+          }
+          else
+          {
+            String errorMessage = line;
+            Serial.println("Error response: " + errorMessage);
+          }
+        }
+        else if (line.startsWith("Content-Type:"))
+        {
+          contentType = CustomContentType::PlainText;
+          String contentType = line.substring(line.indexOf(' ') + 1, line.length() - 1);
+          Serial.println("Content-Type: " + contentType);
+          contentIsPlainText = (contentType == "text/plain; charset=utf-8");
         }
       }
-      String line = client.readStringUntil('\n'); // payload first row
+
+      switch (contentType)
+      {
+      case CustomContentType::PlainText:
+      {
+
+        Serial.println("reading content body...");
+        String content = client.readStringUntil('\n');
+        int contentLength = content.toInt();
+        int bytesRead = content.length() + 1; // add 1 for the '\n' character
+        while (bytesRead < contentLength)
+        {
+          String line = client.readStringUntil('\n');
+          bytesRead += line.length() + 1; // add 1 for the '\n' character
+          content += line;
+        }
+        Serial.println("Content body: " + content);
+        break;
+      }
+
+      case CustomContentType::JSON:
+      {
+
+        // Allocate the JSON document
+        const size_t capacity2 = JSON_ARRAY_SIZE(10) + 10 * JSON_OBJECT_SIZE(2) + 10 * JSON_OBJECT_SIZE(3) + 10 * JSON_OBJECT_SIZE(5) + 10 * JSON_OBJECT_SIZE(8) + 3730;
+        DynamicJsonDocument doc2(capacity);
+
+        // Parse JSON object
+        DeserializationError error = deserializeJson(doc2, client);
+
+        if (error)
+        {
+          Serial.print(F("deserializeJson() failed: "));
+          Serial.println(error.c_str());
+          return;
+        }
+
+        JsonObject root_0 = doc[0];
+        Serial.println("JSON Docss");
+        Serial.println(root_0);
+
+        //  Get the Name:
+        const char *root_0_name = root_0["name"];
+        break;
+      }
+      }
     }
-  
-  catch (const std::exception &e)
-  {
-    Serial.print("Exception caught: ");
-    Serial.println(e.what());
+
+    catch (const std::exception &e)
+    {
+      Serial.print("Exception caught: ");
+      Serial.println(e.what());
+    }
   }
-}
 }
