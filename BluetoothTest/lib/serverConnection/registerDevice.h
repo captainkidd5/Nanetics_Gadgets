@@ -13,6 +13,6 @@
 #include <helpers.h>
 
 
-void postRegisterDevice(WiFiClientSecure &client);
+void postRegisterDevice(WiFiClientSecure &client,DynamicJsonDocument& json);
 
 #endif

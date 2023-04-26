@@ -1,26 +1,26 @@
 #include <Arduino.h>
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
-#include <WifiConnection.h>
+#include <WifiConnectionCustom.h>
 #include <ServerConnection.h>
 #include <WiFiClientSecure.h>
 #include <azureIotConnection.h>
 #include <Preferences.h>
 
 WiFiClientSecure wifiClient;
+const size_t capacity = JSON_OBJECT_SIZE(4) + 48;
+DynamicJsonDocument json(1024);
 
-
-
-void setupWifiConnection(String wifiName, String wifiPass) {
+void setupWifiConnection(String wifiName, String wifiPass)
+{
   // Initialize serial and wait for port to open:
-  Serial.begin(9600);
-  // This delay gives the chance to wait for a Serial Monitor without blocking if none is found
-  delay(4500);
+
   WiFi.mode(WIFI_STA);
   // Configures static IP address
- 
+
   WiFi.begin(wifiName.c_str(), wifiPass.c_str());
   Serial.println("Connecting");
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.print(".");
   }
@@ -31,21 +31,31 @@ void setupWifiConnection(String wifiName, String wifiPass) {
   Serial.flush();
 }
 
-void setup() {
-  if(!hasWifiCredentials){
- 
-  setupWifi();
+void setup()
+{
 
-  }
+  if (!hasWifiCredentials)
+  {
+    Serial.begin(9600);
+    // This delay gives the chance to wait for a Serial Monitor without blocking if none is found
+    delay(4500);
+    Serial.println("Booting up...");
  
+    setupWifiTwo(json);
+  }
+
   setupWifiConnection(WiFi.SSID(), WiFi.psk());
-setupIotConnection();
+  setupIotConnection();
 }
 
-void loop() {
-    if(hasWifiCredentials){
-        apiLoop(wifiClient);
-        //IotLoop();
-    }
-    // put your main code here, to run repeatedly:
+void loop()
+{
+  if (hasWifiCredentials)
+  {
+    Serial.println("in loop");
+
+    //apiLoop(wifiClient, json);
+    // IotLoop();
+  }
+  // put your main code here, to run repeatedly:
 }

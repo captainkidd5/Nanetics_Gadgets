@@ -10,7 +10,7 @@
 
 
 
-void Get(WiFiClientSecure& client) {
+void Get(WiFiClientSecure& client,DynamicJsonDocument& json) {
   //need to use 443 for https
   int conn = client.connect(serverUri,serverPort);
 
@@ -51,14 +51,14 @@ void Get(WiFiClientSecure& client) {
 
 
 
-  void apiLoop(WiFiClientSecure& client) {
+  void apiLoop(WiFiClientSecure& client,DynamicJsonDocument& json) {
 
 if (WiFi.status() == WL_CONNECTED) {
     delay(10000);
    
      client.setCACert(root_ca);
    //Get(client);
-postRegisterDevice(client);
+postRegisterDevice(client, json);
 
 }
 else {

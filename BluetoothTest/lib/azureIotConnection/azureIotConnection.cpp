@@ -121,7 +121,12 @@ static void initializeTime()
   {
     delay(500);
     Serial.print(".");
+    // Print the acquired time
+Serial.print("Acquired time: ");
+Serial.println(ctime(&now));
     now = time(nullptr);
+
+    
   }
   Serial.println("");
   Logger.Info("Time initialized!");

@@ -7,6 +7,6 @@
 
 
 void SetupServerCredentials(const char* sName);
-  void apiLoop(WiFiClientSecure& client);
+  void apiLoop(WiFiClientSecure& client,DynamicJsonDocument& json);
 
   #endif
