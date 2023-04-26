@@ -25,106 +25,106 @@ void postRegisterDevice(WiFiClientSecure &client,DynamicJsonDocument& json)
        Serial.println("Hardware id is " + macAddress);
        json.clear();
 
-       json["deviceHardWareId"] = macAddress;
+        json["deviceHardWareId"] = macAddress;
        
        String payload;
        
-       serializeJson(json, payload);
-      // // Request
-      //  Serial.println("Sending payload...");
-      // String uri = serverUri;
-      // uri = "https://" + uri;
-      // client.println("POST " + uri + "/Devices/RegistrationRequest HTTP/1.1");
-      // client.println(String("Host: ") + serverUri);
-      // client.println(F("Connection: close"));
-      // client.println("Content-Type: application/json");
-      // client.print("Content-Length: ");
-      // client.println(payload.length());
-      // client.println();
-      // client.println(payload);
-      // bool contentIsPlainText = false;
-      // CustomContentType contentType = CustomContentType::None;
-      // json.clear();
+      serializeJson(json, payload);
+      // Request
+       Serial.println("Sending payload...");
+      String uri = serverUri;
+      uri = "https://" + uri;
+      client.println("POST " + uri + "/Devices/RegistrationRequest HTTP/1.1");
+      client.println(String("Host: ") + serverUri);
+      client.println(F("Connection: close"));
+      client.println("Content-Type: application/json");
+      client.print("Content-Length: ");
+      client.println(payload.length());
+      client.println();
+      client.println(payload);
+      bool contentIsPlainText = false;
+      CustomContentType contentType = CustomContentType::None;
+      json.clear();
 
-      // while (client.connected())
-      // {
-      //   String line = client.readStringUntil('\n'); // HTTP headers
-      //   // Serial.println(line);
-      //   if (line == "\r")
-      //   {
-      //     if (contentIsPlainText)
-      //     {
-      //       break;
-      //     }
-      //   }
-      //   if (line.startsWith("HTTP/1."))
-      //   {
-      //     int statusCode = line.substring(line.indexOf(' ') + 1, line.indexOf(' ') + 4).toInt();
-      //     Serial.println("Response code: " + String(statusCode));
-      //     if (isSuccessCode(statusCode))
-      //     {
-      //       Serial.println("Request successful!");
-      //       contentIsPlainText = true;
-      //     }
-      //     else
-      //     {
-      //       String errorMessage = line;
-      //       Serial.println("Error response: " + errorMessage);
-      //     }
-      //   }
-      //   else if (line.startsWith("Content-Type:"))
-      //   {
-      //     contentType = CustomContentType::PlainText;
-      //     String contentType = line.substring(line.indexOf(' ') + 1, line.length() - 1);
-      //     Serial.println("Content-Type: " + contentType);
-      //     contentIsPlainText = (contentType == "text/plain; charset=utf-8");
-      //   }
-      // }
-      // switch (contentType)
-      // {
-      // case CustomContentType::PlainText:
-      // {
+      while (client.connected())
+      {
+        String line = client.readStringUntil('\n'); // HTTP headers
+        // Serial.println(line);
+        if (line == "\r")
+        {
+          if (contentIsPlainText)
+          {
+            break;
+          }
+        }
+        if (line.startsWith("HTTP/1."))
+        {
+          int statusCode = line.substring(line.indexOf(' ') + 1, line.indexOf(' ') + 4).toInt();
+          Serial.println("Response code: " + String(statusCode));
+          if (isSuccessCode(statusCode))
+          {
+            Serial.println("Request successful!");
+            contentIsPlainText = true;
+          }
+          else
+          {
+            String errorMessage = line;
+            Serial.println("Error response: " + errorMessage);
+          }
+        }
+        else if (line.startsWith("Content-Type:"))
+        {
+          contentType = CustomContentType::PlainText;
+          String contentType = line.substring(line.indexOf(' ') + 1, line.length() - 1);
+          Serial.println("Content-Type: " + contentType);
+          contentIsPlainText = (contentType == "text/plain; charset=utf-8");
+        }
+      }
+      switch (contentType)
+      {
+      case CustomContentType::PlainText:
+      {
 
-      //   Serial.println("reading content body...");
-      //   String content = client.readStringUntil('\n');
-      //   int contentLength = content.toInt();
-      //   int bytesRead = content.length() + 1; // add 1 for the '\n' character
-      //   while (bytesRead < contentLength)
-      //   {
-      //     String line = client.readStringUntil('\n');
-      //     bytesRead += line.length() + 1; // add 1 for the '\n' character
-      //     content += line;
-      //   }
-      //   Serial.println("Content body: " + content);
-      //   break;
-      // }
+        Serial.println("reading content body...");
+        String content = client.readStringUntil('\n');
+        int contentLength = content.toInt();
+        int bytesRead = content.length() + 1; // add 1 for the '\n' character
+        while (bytesRead < contentLength)
+        {
+          String line = client.readStringUntil('\n');
+          bytesRead += line.length() + 1; // add 1 for the '\n' character
+          content += line;
+        }
+        Serial.println("Content body: " + content);
+        break;
+      }
 
-      // case CustomContentType::JSON:
-      // {
+      case CustomContentType::JSON:
+      {
 
-      //   // Allocate the JSON document
+        // Allocate the JSON document
        
-      //   // Parse JSON object
-      //   DeserializationError error = deserializeJson(json, client);
+        // Parse JSON object
+        DeserializationError error = deserializeJson(json, client);
 
-      //   if (error)
-      //   {
-      //     Serial.print(F("deserializeJson() failed: "));
-      //     Serial.println(error.c_str());
-      //     return;
-      //   }
+        if (error)
+        {
+          Serial.print(F("deserializeJson() failed: "));
+          Serial.println(error.c_str());
+          return;
+        }
 
-      //   JsonObject root_0 = json[0];
-      //   Serial.println("JSON Docss");
-      //   Serial.println(root_0);
+        JsonObject root_0 = json[0];
+        Serial.println("JSON Docss");
+        Serial.println(root_0);
 
-      //   //  Get the Name:
-      //   const char *root_0_name = root_0["name"];
-      // json.clear();
+        //  Get the Name:
+        const char *root_0_name = root_0["name"];
+      json.clear();
 
-      //   break;
-      // }
-      // }
+        break;
+      }
+      }
 
     }
 

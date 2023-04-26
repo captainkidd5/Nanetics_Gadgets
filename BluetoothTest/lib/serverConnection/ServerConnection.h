@@ -1,12 +1,13 @@
 #ifndef SERVER_CONNECTION
 #define SERVER_CONNECTION
 
-#include <Arduino.h>
-#include <WiFiManager.h> 
+#include <ArduinoJson.h>
+#include <ArduinoJson.hpp>
 #include <WiFiClientSecure.h>
+#include <ESPmDNS.h>
+#include <registerDevice.h>
 
 
-void SetupServerCredentials(const char* sName);
   void apiLoop(WiFiClientSecure& client,DynamicJsonDocument& json);
 
   #endif

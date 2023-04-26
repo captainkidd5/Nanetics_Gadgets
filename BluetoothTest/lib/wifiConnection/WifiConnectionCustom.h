@@ -11,6 +11,6 @@
 #include <ArduinoJson.h>    
 
 extern bool hasWifiCredentials;
-void setupWifiTwo(DynamicJsonDocument& json);
+void setupWifi(DynamicJsonDocument& json);
 
 #endif // _SETUPWIFI_H
