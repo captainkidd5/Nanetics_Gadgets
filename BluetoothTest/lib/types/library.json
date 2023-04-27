@@ -1,0 +1,6 @@
+{
+    "name": "types",
+    "build": {
+        "srcDir": "src"
+    }
+}

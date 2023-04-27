@@ -2,12 +2,10 @@
 #define HTTP_HELPERS
 
 #include <ArduinoJson.h>
-enum class CustomContentType {
-  None,
-  PlainText,
-  JSON
-};
+#include "../types/customHeader.h"
 
 bool isSuccessCode(int statusCode);
-DynamicJsonDocument deserialize(String response);
+Headers ReadHeaders(WiFiClientSecure &client,DynamicJsonDocument& json);
+String ReadPlainText(WiFiClientSecure &client);
+JsonObject ReadJson(WiFiClientSecure &client,DynamicJsonDocument& json);
 #endif

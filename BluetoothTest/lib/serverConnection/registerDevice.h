@@ -8,11 +8,12 @@
 #include <WiFiClientSecure.h>
 #include <ESPmDNS.h>
 #include <server_configs.h>
-#include <httpHelpers.h>
+#include <HttpHelpers.h>
 #include <iostream>
 #include <helpers.h>
+#include "../types/customHeader.h"
 
 
-void postRegisterDevice(WiFiClientSecure &client,DynamicJsonDocument& json);
+void PostRegisterDevice(WiFiClientSecure &client,DynamicJsonDocument& json);
 
 #endif

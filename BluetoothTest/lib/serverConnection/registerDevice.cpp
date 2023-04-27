@@ -7,8 +7,9 @@
 #include <httpHelpers.h>
 #include <iostream>
 #include <helpers.h>
+#include "../types/customHeader.h"
 
-void postRegisterDevice(WiFiClientSecure &client,DynamicJsonDocument& json)
+void PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
 {
 
   client.setTimeout(30000);
@@ -17,21 +18,19 @@ void postRegisterDevice(WiFiClientSecure &client,DynamicJsonDocument& json)
   {
     try
     {
-       Serial.println();
-       Serial.print("Sending JSON body...");
-      // //1 is the number of properties in the json doc which will be serialized
+      Serial.println();
+      Serial.print("Sending JSON body...");
 
-       String macAddress = String(ESP.getEfuseMac());
-       Serial.println("Hardware id is " + macAddress);
-       json.clear();
+      String macAddress = String(ESP.getEfuseMac());
+      Serial.println("Hardware id is " + macAddress);
+      json.clear();
 
-        json["deviceHardWareId"] = macAddress;
-       
-       String payload;
-       
+      json["deviceHardWareId"] = macAddress;
+
+      String payload;
+
       serializeJson(json, payload);
-      // Request
-       Serial.println("Sending payload...");
+      Serial.println("Sending payload...");
       String uri = serverUri;
       uri = "https://" + uri;
       client.println("POST " + uri + "/Devices/RegistrationRequest HTTP/1.1");
@@ -42,45 +41,10 @@ void postRegisterDevice(WiFiClientSecure &client,DynamicJsonDocument& json)
       client.println(payload.length());
       client.println();
       client.println(payload);
-      bool contentIsPlainText = false;
-      CustomContentType contentType = CustomContentType::None;
       json.clear();
 
-      while (client.connected())
-      {
-        String line = client.readStringUntil('\n'); // HTTP headers
-        // Serial.println(line);
-        if (line == "\r")
-        {
-          if (contentIsPlainText)
-          {
-            break;
-          }
-        }
-        if (line.startsWith("HTTP/1."))
-        {
-          int statusCode = line.substring(line.indexOf(' ') + 1, line.indexOf(' ') + 4).toInt();
-          Serial.println("Response code: " + String(statusCode));
-          if (isSuccessCode(statusCode))
-          {
-            Serial.println("Request successful!");
-            contentIsPlainText = true;
-          }
-          else
-          {
-            String errorMessage = line;
-            Serial.println("Error response: " + errorMessage);
-          }
-        }
-        else if (line.startsWith("Content-Type:"))
-        {
-          contentType = CustomContentType::PlainText;
-          String contentType = line.substring(line.indexOf(' ') + 1, line.length() - 1);
-          Serial.println("Content-Type: " + contentType);
-          contentIsPlainText = (contentType == "text/plain; charset=utf-8");
-        }
-      }
-      switch (contentType)
+      Headers headers = ReadHeaders(client, json);
+      switch (headers.ContentType)
       {
       case CustomContentType::PlainText:
       {
@@ -102,9 +66,7 @@ void postRegisterDevice(WiFiClientSecure &client,DynamicJsonDocument& json)
       case CustomContentType::JSON:
       {
 
-        // Allocate the JSON document
-       
-        // Parse JSON object
+
         DeserializationError error = deserializeJson(json, client);
 
         if (error)
@@ -115,17 +77,15 @@ void postRegisterDevice(WiFiClientSecure &client,DynamicJsonDocument& json)
         }
 
         JsonObject root_0 = json[0];
-        Serial.println("JSON Docss");
         Serial.println(root_0);
 
         //  Get the Name:
         const char *root_0_name = root_0["name"];
-      json.clear();
+        json.clear();
 
         break;
       }
       }
-
     }
 
     catch (const std::exception &e)

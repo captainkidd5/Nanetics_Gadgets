@@ -56,7 +56,7 @@
 if (WiFi.status() == WL_CONNECTED) {
     delay(10000);
    
-postRegisterDevice(client, json);
+PostRegisterDevice(client, json);
 
 }
 else {
