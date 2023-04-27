@@ -4,7 +4,51 @@
 #include <map>
 #include <string>
 #include "../types/customHeader.h"
+#include <Server_configs.h>
 
+
+enum class RequestType{
+  GET = 1,
+  POST = 2,
+  PUT = 3,
+  DELETE = 4
+};
+String RequestTypeToString(RequestType r) {
+  switch (r) {
+    case RequestType::GET:
+      return "GET";
+    case RequestType::POST:
+      return "POST";
+    case RequestType::PUT:
+      return "PUT";
+       case RequestType::DELETE:
+      return "DELETE";
+    default:
+       throw std::invalid_argument("Invalid request type.");
+  }
+}
+
+void SendRequest(RequestType reqType, String fullEndPoint, String payload,
+ WiFiClientSecure &client, DynamicJsonDocument &json){
+  json.clear();
+
+    String requestType = RequestTypeToString(reqType);
+      String payload;
+
+      serializeJson(json, payload);
+      Serial.println("Sending payload...");
+      String uri = serverUri;
+      uri = " https://" + uri;
+      client.println(requestType + uri + FullEndPoint + " HTTP/1.1");
+      client.println(String("Host: ") + serverUri);
+      client.println(F("Connection: close"));
+      client.println("Content-Type: application/json");
+      client.print("Content-Length: ");
+      client.println(payload.length());
+      client.println();
+      client.println(payload);
+      json.clear();
+ }
 
 bool isSuccessCode(int statusCode) {
   return statusCode >= 200 && statusCode < 300;

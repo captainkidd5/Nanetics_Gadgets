@@ -4,7 +4,7 @@
 #include <WiFiClientSecure.h>
 #include <azureIotConnection.h>
 #include <Preferences.h>
-#include <server_configs.h>
+#include <Server_configs.h>
 #include <ServerConnection.h>
 
 

@@ -3,15 +3,18 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <ESPmDNS.h>
-#include <server_configs.h>
-#include <httpHelpers.h>
+#include <Server_configs.h>
+#include <HttpHelpers.h>
 #include <iostream>
 #include "../helpers/Helpers.h"
 #include "../types/customHeader.h"
 
-boolean PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
-{
 
+const String BaseEndPoint = "/devices";
+
+void PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
+{
+    const String FullEndPoint = BaseEndPoint + "/RegistrationRequest";
   client.setTimeout(30000);
   int conn = client.connect(serverUri, serverPort);
   if (conn == 1)
@@ -28,11 +31,13 @@ boolean PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
       json["deviceHardWareId"] = macAddress;
 
       String payload;
+boolean success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json);
+
       serializeJson(json, payload);
       Serial.println("Sending payload...");
       String uri = serverUri;
       uri = "https://" + uri;
-      client.println("POST " + uri + "/Devices/RegistrationRequest HTTP/1.1");
+      client.println("POST " + uri + FullEndPoint + " HTTP/1.1");
       client.println(String("Host: ") + serverUri);
       client.println(F("Connection: close"));
       client.println("Content-Type: application/json");
@@ -58,8 +63,6 @@ boolean PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
         break;
       }
       }
-
-      return true;
     }
 
     catch (const std::exception &e)
@@ -68,8 +71,6 @@ boolean PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
 
       Serial.print("Exception caught: ");
       Serial.println(e.what());
-      return false;
     }
-    return false;
   }
 }

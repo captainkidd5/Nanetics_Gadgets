@@ -1,5 +1,3 @@
-
-
 //#define serverUri "https://1b51-24-56-229-42.ngrok-free.app/"
 
 #define serverUri "naneticsapi.azurewebsites.net"
