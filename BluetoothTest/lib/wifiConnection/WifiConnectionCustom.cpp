@@ -97,8 +97,8 @@ void setupWifi(DynamicJsonDocument &json)
   //   // The extra parameters to be configured (can be either global or just in the setup)
   //   // After connecting, parameter.getValue() will get you the configured value
   //   // id/name placeholder/prompt default length
-  WiFiManagerParameter user_name("username", "username", username, 48);
-  WiFiManagerParameter pass_word("password", "password", password, 48);
+WiFiManagerParameter user_name("username", "User Email Address", username, 48,"type=\"email\" required");
+WiFiManagerParameter pass_word("password", "Password", password, 48,"type=\"password\" required");
 
   //   // WiFiManager
   //   // Local intialization. Once its business is done, there is no need to keep it around
