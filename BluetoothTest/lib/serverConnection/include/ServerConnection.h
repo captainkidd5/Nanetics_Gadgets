@@ -5,9 +5,8 @@
 #include <ArduinoJson.hpp>
 #include <WiFiClientSecure.h>
 #include <ESPmDNS.h>
-#include <registerDevice.h>
+#include "Device.h"
 
 
-  void apiLoop(WiFiClientSecure& client,DynamicJsonDocument& json);
-
+void ApiLoop(WiFiClientSecure &client, DynamicJsonDocument &json);
   #endif

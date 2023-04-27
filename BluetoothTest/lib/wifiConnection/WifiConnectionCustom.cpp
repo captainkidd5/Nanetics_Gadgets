@@ -8,11 +8,14 @@
 #include <ArduinoJson.h>
 #include <ArduinoJson.hpp>
 
+#include "HttpHelpers.h"
+
 // custom parameters with validation: https://github.com/tzapu/WiFiManager/issues/736
 //  define your default values here, if there are different values in config.json, they are overwritten.
 char username[48] = "USERNAME";
 char password[48] = "PASSWORD";
-
+ extern String s_username;
+ extern String s_password;
 // flag for saving data
 bool shouldSaveConfig = false;
 bool hasWifiCredentials = false;
@@ -72,6 +75,8 @@ void setupWifi(DynamicJsonDocument &json)
             Serial.println("\nparsed json");
             strcpy(username, json["username"]);
             strcpy(password, json["password"]);
+            s_username = username;
+            s_password = password;
           }
           else
           {
@@ -162,7 +167,8 @@ WiFiManagerParameter pass_word("password", "Password", password, 48,"type=\"pass
 
     json["username"] = String(username);
     json["password"] = String(password);
-
+s_username = username;
+            s_password = password;
     File configFile = SPIFFS.open("/config.json", "w");
     if (!configFile)
     {

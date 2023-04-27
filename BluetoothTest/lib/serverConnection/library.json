@@ -1,6 +1,7 @@
 {
     "name": "serverConnection",
     "build": {
-        "srcDir": "src"
+        "srcDir": "src",
+        "includeDir": "include"
     }
 }

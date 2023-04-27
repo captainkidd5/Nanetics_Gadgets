@@ -1,6 +1,7 @@
 {
     "name": "helpers",
     "build": {
-        "srcDir": "src"
+        "srcDir": "src",
+        "include": "include"
     }
 }

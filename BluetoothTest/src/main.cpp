@@ -1,11 +1,14 @@
+
 #include <Arduino.h>
-#include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
+#include <ArduinoJson.h>
+#include <ArduinoJson.hpp>
 #include <WifiConnectionCustom.h>
 #include <WiFiClientSecure.h>
 #include <azureIotConnection.h>
 #include <Preferences.h>
-#include <Server_configs.h>
-#include <ServerConnection.h>
+// #include <ServerConnection.h>
+
+#include "ServerConnection.h"
 
 
 WiFiClientSecure wifiClient;
@@ -33,7 +36,6 @@ void setupWifiConnection(String wifiName, String wifiPass)
 
 void setup()
 {
-
   if (!hasWifiCredentials)
   {
     Serial.begin(115200);
@@ -54,11 +56,11 @@ Serial.println("Available space is " + String(size));
 
 void loop()
 {
+
   if (hasWifiCredentials)
   {
-    //Serial.println("in loop");
 
-    apiLoop(wifiClient, json);
+    ApiLoop(wifiClient, json);
     // IotLoop();
   }
     delay(1000);

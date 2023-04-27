@@ -1,5 +1,6 @@
 //#define serverUri "https://1b51-24-56-229-42.ngrok-free.app/"
-
+#ifndef SERVER_CONFIGS
+#define SERVER_CONFIGS
 #define serverUri "naneticsapi.azurewebsites.net"
 #define serverPort  443
 
@@ -61,3 +62,4 @@
 // "mRGunUHBcnWEvgJBQl9nJEiU0Zsnvgc/ubhPgXRR4Xq37Z0j4r7g1SgEEzwxA57d\n" \
 // "emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=\n" \
 // "-----END CERTIFICATE-----\n"
+#endif

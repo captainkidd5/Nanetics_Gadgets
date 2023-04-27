@@ -1,6 +1,7 @@
 {
     "name": "api",
     "build": {
-        "srcDir": "src"
+        "srcDir": "src",
+        "include":"include"
     }
 }

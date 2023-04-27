@@ -9,6 +9,7 @@
 #endif
 
 #include <ArduinoJson.h>    
+#include "HttpHelpers.h"
 
 extern bool hasWifiCredentials;
 void setupWifi(DynamicJsonDocument& json);
