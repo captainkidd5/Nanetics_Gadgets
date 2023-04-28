@@ -14,7 +14,7 @@ extern String s_username;
 extern String s_password;
 
 boolean SendRequest(RequestType reqType, String fullEndPoint, String payload,
- WiFiClientSecure &client, DynamicJsonDocument &json);
+ WiFiClientSecure &client, DynamicJsonDocument &json,bool includeRefreshToken = true);
 bool isSuccessCode(int statusCode);
 Headers ReadHeaders(WiFiClientSecure &client,DynamicJsonDocument& json);
 String ReadPlainText(WiFiClientSecure &client);

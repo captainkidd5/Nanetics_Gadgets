@@ -12,14 +12,14 @@ enum class CustomContentType {
 
 class Headers {
 public:
-  Headers(CustomContentType contentType = CustomContentType::None) : ContentType(contentType) {}
+  Headers(){}
   CustomContentType ContentType;
 
-  void setHeader(const string& key, const string& value) {
+  void setHeader(String key, String value) {
     HeadersMap[key] = value;
   }
 
-  string getHeader(const string& key) const {
+  String getHeader(String key) const {
     auto it = HeadersMap.find(key);
     if (it != HeadersMap.end()) {
       return it->second;
@@ -29,5 +29,5 @@ public:
   }
 
 private:
-  std::map<string, string> HeadersMap; // specify namespace explicitly
+  std::map<String, String> HeadersMap; // specify namespace explicitly
 };

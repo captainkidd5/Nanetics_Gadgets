@@ -16,13 +16,13 @@ enum class CustomContentType {
 
 class Headers {
 public:
-CustomContentType ContentType;
-Headers(CustomContentType contentType = CustomContentType::None) : ContentType(contentType) {}
+  CustomContentType ContentType;
+  Headers() {}
 
-void setHeader(const string& key, const string& value);
-string getHeader(const string& key) const;
+  void setHeader(String key, String value);
+  String getHeader(String key) const;
 
 private:
-std::map<string, string> HeadersMap;
+  std::map<String, String> HeadersMap;
 };
 #endif

@@ -32,7 +32,8 @@ void PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json)
         Serial.println("Username is " + s_username);
         Serial.println("Password is " + s_password);
       String payload;
-      boolean success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json);
+      //Do not send refresh token with login request, because we don't have one yet
+      boolean success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json, false);
 
       Headers headers = ReadHeaders(client, json);
      
