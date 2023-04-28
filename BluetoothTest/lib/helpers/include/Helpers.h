@@ -4,6 +4,6 @@
 
 
 void printAvailableMemory();
-boolean storeFlashValue(String key, String value);
-boolean retrieveFlashValue(String key, String& outResult);
+bool storeFlashValue(String key, String value);
+bool retrieveFlashValue(String key, String& outResult);
 #endif

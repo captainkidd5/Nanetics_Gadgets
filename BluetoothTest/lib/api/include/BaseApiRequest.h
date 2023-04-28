@@ -5,7 +5,7 @@
 #include <WiFiClientSecure.h>
 #include "HttpHelpers.h"
 
-boolean SendRequest(RequestType reqType, String fullEndPoint, String payload,
+bool SendRequest(RequestType reqType, String fullEndPoint, String payload,
  WiFiClientSecure &client, DynamicJsonDocument &json,bool includeRefreshToken = true);
 
  #endif

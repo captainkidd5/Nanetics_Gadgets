@@ -3,13 +3,29 @@
 #include <WiFiClientSecure.h>
 #include "HttpHelpers.h"
 #include "Helpers.h"
+#include "Headers.h"
+// Sends a json payload in the body of the http request
+void SendJsonPayload(String payload,
+                     WiFiClientSecure &client, DynamicJsonDocument &json)
+{
+    client.println("Content-Type: application/json");
 
-boolean SendRequest(RequestType reqType, String fullEndPoint, String payload,
+    client.print("Content-Length: ");
+    client.println(payload.length());
+    client.println();
+    serializeJson(json, payload);
+    Serial.println("Sending payload...");
+    Serial.println("Payload is " + payload);
+    client.println(payload);
+    Serial.println("...Sending Payload [DONE]");
+    json.clear();
+}
+bool SendRequest(RequestType reqType, String fullEndPoint, String payload,
                     WiFiClientSecure &client, DynamicJsonDocument &json, bool includeRefreshToken = true)
 {
 
     String requestType = RequestTypeToString(reqType);
-
+    Serial.println("Sending new " + requestType + " request to endpoint " + fullEndPoint + "...");
     String uri = serverUri;
     uri = " https://" + uri;
     String full = requestType + uri + fullEndPoint + " HTTP/1.1";
@@ -38,26 +54,11 @@ boolean SendRequest(RequestType reqType, String fullEndPoint, String payload,
     return true;
 }
 
-// Sends a json payload in the body of the http request
-void SendJsonPayload(String payload,
-                     WiFiClientSecure &client, DynamicJsonDocument &json)
-{
-    client.println("Content-Type: application/json");
 
-    client.print("Content-Length: ");
-    client.println(payload.length());
-    client.println();
-    serializeJson(json, payload);
-    Serial.println("Sending payload...");
-    Serial.println("Payload is " + payload);
-    client.println(payload);
-    Serial.println("...Sending Payload [DONE]");
-    json.clear();
-}
 // Attempt to grab a new refresh token, called whenever we get a 401 unauthorized.
 // Returns true if we are returned a new refresh token. Returns false otherwise, and
 // removes username and password credentials
-boolean PostRefresh(WiFiClientSecure &client, DynamicJsonDocument &json)
+bool PostRefresh(WiFiClientSecure &client, DynamicJsonDocument &json)
 {
     const String FullEndPoint = "/auth/refresh";
     client.setTimeout(30000);
@@ -69,13 +70,13 @@ boolean PostRefresh(WiFiClientSecure &client, DynamicJsonDocument &json)
 
         String payload;
         // Do not send refresh token with login request, because we don't have one yet
-        boolean success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json, true);
+        bool success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json, true);
 
         if (!success)
         {
             return false;
         }
-        CustomHeader headers = ReadHeaders(client, json);
+        Headers headers = ReadHeaders(client);
 
         JsonObject root_0 = ReadJson(client, json);
         return true;

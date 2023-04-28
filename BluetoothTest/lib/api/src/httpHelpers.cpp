@@ -2,7 +2,7 @@
 #include <ArduinoJson.hpp>
 #include <WiFiClientSecure.h>
 #include <map>
-#include "CustomHeader.h"
+#include "Headers.h"
 #include <Arduino.h>
 #include "Helpers.h"
 #include "Server_configs.h"
@@ -45,7 +45,6 @@ JsonObject ReadJson(WiFiClientSecure &client, DynamicJsonDocument &json)
    Serial.println("...Attempting to deserialize JSON [FAILED]");
 
     Serial.println(error.c_str());
-    throw std::invalid_argument("Bad Json");
   }
 
   JsonObject root_0 = json[0];
@@ -59,71 +58,16 @@ bool isSuccessCode(int statusCode)
 
 
 
-CustomHeader ReadHeaders(WiFiClientSecure &client, DynamicJsonDocument &json)
+Headers ReadHeaders(WiFiClientSecure &client)
 {
-  CustomContentType contentType = CustomContentType::None;
 
-  bool contentIsPlainText = false;
-  Serial.println("Reading headers...");
-  CustomHeader headers;
-
+  Headers headers;
   while (client.connected())
   {
-    String line = client.readStringUntil('\n'); // HTTP headers
-    Serial.println(line);
-    if (line == "\r")
-    {
-      if (contentIsPlainText)
-      {
-        break;
-      }
-    }
-    if (line.startsWith("HTTP/1."))
-    {
-      int statusCode = line.substring(line.indexOf(' ') + 1, line.indexOf(' ') + 4).toInt();
-      headers.StatusCode = statusCode;
-      Serial.println("Response code: " + String(statusCode));
-      if (isSuccessCode(statusCode))
-      {
-        Serial.println("Request successful!");
-        contentIsPlainText = true;
-      }
-      else
-      {
-
-        String errorMessage = line;
-        Serial.println("Error response: " + errorMessage);
-
-      
-      }
-    }
-    else if (line.startsWith("Content-Type:"))
-    {
-      contentType = CustomContentType::PlainText;
-      String contentTypeString = line.substring(line.indexOf(' ') + 1, line.length() - 1);
-      Serial.println("Content-Type: " + contentTypeString);
-      contentIsPlainText = (contentTypeString == "text/plain; charset=utf-8");
-      if(!contentIsPlainText){
-        contentType = CustomContentType::JSON;
-      }
-      headers.ContentType = contentType;
-    }
-    else
-    {
-      int separatorIndex = line.indexOf(':');
-      if (separatorIndex != -1)
-      { // check if the line has a ':' separator
-        String key = line.substring(0, separatorIndex);
-        String value = line.substring(separatorIndex + 1);
-        Serial.println("Setting Header: ");
-        Serial.println("Key: " + key);
-        Serial.println("Value: " + value);
-
-        headers.setHeader(key, value); // add the header as a key-value pair to the Headers object
-      }
-    }
+    headers.ParseHeaders(client);
+    break;
+    
   }
-  Serial.println("...Reading headers [DONE]");
 
   return headers;
 }

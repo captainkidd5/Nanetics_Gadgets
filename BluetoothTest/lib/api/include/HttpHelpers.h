@@ -6,7 +6,7 @@
 #include <ArduinoJson.hpp>
 #include <WiFiClientSecure.h>
 #include <map>
-#include "CustomHeader.h"
+#include "Headers.h"
 
 #include "Server_configs.h"
 
@@ -24,7 +24,7 @@ extern String s_password;
 String RequestTypeToString(RequestType r);
 
 bool isSuccessCode(int statusCode);
-CustomHeader ReadHeaders(WiFiClientSecure &client,DynamicJsonDocument& json);
+Headers ReadHeaders(WiFiClientSecure &client);
 String ReadPlainText(WiFiClientSecure &client);
 JsonObject ReadJson(WiFiClientSecure &client,DynamicJsonDocument& json);
 #endif

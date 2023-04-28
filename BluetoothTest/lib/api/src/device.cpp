@@ -7,7 +7,7 @@
 #include "HttpHelpers.h"
 #include <iostream>
 #include "Helpers.h"
-#include "CustomHeader.h"
+#include "Headers.h"
 #include "BaseApiRequest.h"
 
 const String BaseEndPoint = "/devices";
@@ -29,9 +29,9 @@ void PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
       json["deviceHardWareId"] = macAddress;
 
       String payload;
-      boolean success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json);
+      bool success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json);
 
-      CustomHeader headers = ReadHeaders(client, json);
+      Headers headers = ReadHeaders(client);
       switch (headers.ContentType)
       {
       case CustomContentType::PlainText:

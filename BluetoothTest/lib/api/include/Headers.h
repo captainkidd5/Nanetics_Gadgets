@@ -12,14 +12,15 @@ enum class CustomContentType {
   PlainText,
   JSON
 };
-
+//const means cannot modify state of headers class
 class Headers {
 public:
-  void setHeader(String key, String value);
-  String getHeader(String key) const;
+  void SetHeader(String key, String value);
+  String GetHeader(String key) const;
+  void ParseHeaders(WiFiClientSecure &client);
+
   CustomContentType ContentType;
   int StatusCode;
-
 private:
   std::map<String, String> HeadersMap;
 };

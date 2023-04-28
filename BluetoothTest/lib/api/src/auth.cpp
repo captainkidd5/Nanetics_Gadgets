@@ -7,7 +7,7 @@
 #include "HttpHelpers.h"
 #include <iostream>
 #include "Helpers.h"
-#include "CustomHeader.h"
+#include "Headers.h"
 #include "BaseApiRequest.h"
 
 const String BaseEndPoint = "/auth";
@@ -25,23 +25,19 @@ void PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json)
     {
 
       String macAddress = String(ESP.getEfuseMac());
-      // Serial.println("Hardware id is " + macAddress);
       json.clear();
 
       json["email"] = s_username;
       json["password"] = s_password;
-        Serial.println("Username is " + s_username);
-        Serial.println("Password is " + s_password);
+      Serial.println("Username is " + s_username);
+      Serial.println("Password is " + s_password);
       String payload;
-      //Do not send refresh token with login request, because we don't have one yet
-      boolean success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json, false);
+      // Do not send refresh token with login request, because we don't have one yet
+      bool success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json, false);
 
-      CustomHeader headers = ReadHeaders(client, json);
+      Headers headers = ReadHeaders(client);
 
-      
-        JsonObject root_0 = ReadJson(client, json);
-      
-      
+      JsonObject root_0 = ReadJson(client, json);
     }
 
     catch (const std::exception &e)
@@ -53,5 +49,3 @@ void PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json)
     }
   }
 }
-
-

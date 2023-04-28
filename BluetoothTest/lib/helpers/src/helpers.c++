@@ -14,7 +14,7 @@ void printAvailableMemory(){
    Serial.println(" bytes");
 }
 
-boolean storeFlashValue(String key, String value){
+bool storeFlashValue(String key, String value){
   Serial.println("Attemping to store flash key []" + key + "] with value [" + value + "]...");
   if (!preferences.begin("storage", false)) {
     // Failed to open the partition, return an empty string
@@ -33,7 +33,7 @@ boolean storeFlashValue(String key, String value){
 
 //Returns true if flash value was found, value is stored in outResult.
 //Returns false otherwise.
-boolean retrieveFlashValue(String key, String& outResult){
+bool retrieveFlashValue(String key, String& outResult){
   Serial.println("Attemping to retrieve flash key []" + key + "]...");
 
    if (!preferences.begin("storage", false)) {
