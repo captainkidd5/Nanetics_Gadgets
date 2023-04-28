@@ -36,7 +36,6 @@ boolean SendRequest(RequestType reqType, String fullEndPoint, String payload,
  WiFiClientSecure &client, DynamicJsonDocument &json){
    try
     {
-  json.clear();
 
     String requestType = RequestTypeToString(reqType);
       String payload;
@@ -45,7 +44,7 @@ boolean SendRequest(RequestType reqType, String fullEndPoint, String payload,
       Serial.println("Sending payload...");
       String uri = serverUri;
       uri = " https://" + uri;
-
+      Serial.println("Payload is " + payload);
       String full = requestType + uri + fullEndPoint + " HTTP/1.1";
       Serial.println("Full is " + full);
       client.println(requestType + uri + fullEndPoint + " HTTP/1.1");
@@ -82,10 +81,11 @@ Headers ReadHeaders(WiFiClientSecure &client,DynamicJsonDocument& json)
         CustomContentType contentType = CustomContentType::None;
 
       bool contentIsPlainText = false;
+      Serial.println("Reading headers...");
    while (client.connected())
       {
         String line = client.readStringUntil('\n'); // HTTP headers
-        // Serial.println(line);
+         Serial.println(line);
         if (line == "\r")
         {
           if (contentIsPlainText)
@@ -117,6 +117,7 @@ Headers ReadHeaders(WiFiClientSecure &client,DynamicJsonDocument& json)
         }
       }
 Headers myHeaders(contentType);
+      Serial.println("...Reading headers [DONE]");
 
       return myHeaders;
 }

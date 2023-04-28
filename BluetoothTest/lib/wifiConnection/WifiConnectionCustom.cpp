@@ -14,8 +14,8 @@
 //  define your default values here, if there are different values in config.json, they are overwritten.
 char username[48] = "USERNAME";
 char password[48] = "PASSWORD";
- extern String s_username;
- extern String s_password;
+extern String s_username;
+extern String s_password;
 // flag for saving data
 bool shouldSaveConfig = false;
 bool hasWifiCredentials = false;
@@ -102,8 +102,8 @@ void setupWifi(DynamicJsonDocument &json)
   //   // The extra parameters to be configured (can be either global or just in the setup)
   //   // After connecting, parameter.getValue() will get you the configured value
   //   // id/name placeholder/prompt default length
-WiFiManagerParameter user_name("username", "User Email Address", username, 48,"type=\"email\" required");
-WiFiManagerParameter pass_word("password", "Password", password, 48,"type=\"password\" required");
+  WiFiManagerParameter user_name("username", "User Email Address", username, 48, "type=\"email\" required");
+  WiFiManagerParameter pass_word("password", "Password", password, 48, "type= required");
 
   //   // WiFiManager
   //   // Local intialization. Once its business is done, there is no need to keep it around
@@ -144,7 +144,7 @@ WiFiManagerParameter pass_word("password", "Password", password, 48,"type=\"pass
     Serial.println("...Failed to connect and hit timeout");
     delay(3000);
     //     // reset and try again, or maybe put it to deep sleep
-    //ESP.restart();
+    // ESP.restart();
     delay(5000);
   }
 
@@ -167,8 +167,8 @@ WiFiManagerParameter pass_word("password", "Password", password, 48,"type=\"pass
 
     json["username"] = String(username);
     json["password"] = String(password);
-s_username = username;
-            s_password = password;
+    s_username = username;
+    s_password = password;
     File configFile = SPIFFS.open("/config.json", "w");
     if (!configFile)
     {
@@ -189,8 +189,7 @@ s_username = username;
     json.clear();
   }
   //     // end save
-  
-Serial.println("local ip");
-Serial.println(WiFi.localIP());
 
+  Serial.println("local ip");
+  Serial.println(WiFi.localIP());
 }

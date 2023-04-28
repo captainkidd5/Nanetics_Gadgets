@@ -12,7 +12,7 @@
 
 
 WiFiClientSecure wifiClient;
-DynamicJsonDocument json(64);
+DynamicJsonDocument json(128);
 
 void setupWifiConnection(String wifiName, String wifiPass)
 {
