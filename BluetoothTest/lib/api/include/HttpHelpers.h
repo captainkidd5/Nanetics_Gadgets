@@ -21,8 +21,8 @@ enum class RequestType{
 extern String s_username;
 extern String s_password;
 
-boolean SendRequest(RequestType reqType, String fullEndPoint, String payload,
- WiFiClientSecure &client, DynamicJsonDocument &json,bool includeRefreshToken = true);
+String RequestTypeToString(RequestType r);
+
 bool isSuccessCode(int statusCode);
 CustomHeader ReadHeaders(WiFiClientSecure &client,DynamicJsonDocument& json);
 String ReadPlainText(WiFiClientSecure &client);

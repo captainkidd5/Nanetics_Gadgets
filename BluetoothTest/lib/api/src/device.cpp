@@ -8,6 +8,7 @@
 #include <iostream>
 #include "Helpers.h"
 #include "CustomHeader.h"
+#include "BaseApiRequest.h"
 
 const String BaseEndPoint = "/devices";
 

@@ -3,16 +3,16 @@
 #include <WiFiClientSecure.h>
 #include <map>
 #include <Arduino.h>
-#include "CustomHeader.h"
+#include "Headers.h"
 
 
 
-  void CustomHeader::setHeader(String key, String value)  {
+  void Headers::setHeader(String key, String value)  {
     HeadersMap[key] = value;
   }
 
 
-  String CustomHeader::getHeader(String key) const {
+  String Headers::getHeader(String key) const {
     auto it = HeadersMap.find(key);
     if (it != HeadersMap.end()) {
       return it->second;

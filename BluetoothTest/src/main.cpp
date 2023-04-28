@@ -48,8 +48,7 @@ void setup()
 
   setupWifiConnection(WiFi.SSID(), WiFi.psk());
   //setupIotConnection();
-size_t size = ESP.getMaxAllocHeap();
-Serial.println("Available space is " + String(size));
+
      wifiClient.setCACert(root_ca);
 
 }

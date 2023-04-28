@@ -6,12 +6,12 @@ Preferences preferences;
 
 // Create an instance of the Preferences library
 void printAvailableMemory(){
-  //  size_t freeHeap = esp_get_free_heap_size();
+   size_t freeHeap = esp_get_free_heap_size();
   
-  // // // Print the free heap memory to the serial monitor
-  //  Serial.print("Free heap memory: ");
-  //  Serial.print(freeHeap);
-  //  Serial.println(" bytes");
+  // // Print the free heap memory to the serial monitor
+   Serial.print("Free heap memory: ");
+   Serial.print(freeHeap);
+   Serial.println(" bytes");
 }
 
 boolean storeFlashValue(String key, String value){

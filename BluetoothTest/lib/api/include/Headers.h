@@ -13,11 +13,12 @@ enum class CustomContentType {
   JSON
 };
 
-class CustomHeader {
+class Headers {
 public:
   void setHeader(String key, String value);
   String getHeader(String key) const;
   CustomContentType ContentType;
+  int StatusCode;
 
 private:
   std::map<String, String> HeadersMap;
