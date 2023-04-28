@@ -2,8 +2,10 @@
 #include <ArduinoJson.hpp>
 #include <WiFiClientSecure.h>
 #include <map>
-#include <string>
 #include "CustomHeader.h"
+#include <Arduino.h>
+#include <Preferences.h>
+
 #include "Server_configs.h"
 
 enum class RequestType
@@ -17,6 +19,7 @@ enum class RequestType
 String s_username = "";
 String s_password = "";
 
+Preferences preferences;
 String RequestTypeToString(RequestType r)
 {
   switch (r)
@@ -34,6 +37,26 @@ String RequestTypeToString(RequestType r)
   }
 }
 
+JsonObject ReadJson(WiFiClientSecure &client, DynamicJsonDocument &json)
+{
+  DeserializationError error = deserializeJson(json, client);
+
+  if (error)
+  {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.c_str());
+    throw std::invalid_argument("Bad Json");
+  }
+
+  JsonObject root_0 = json[0];
+  return root_0;
+}
+
+bool isSuccessCode(int statusCode)
+{
+  return statusCode >= 200 && statusCode < 300;
+}
+
 boolean SendRequest(RequestType reqType, String fullEndPoint, String payload,
                     WiFiClientSecure &client, DynamicJsonDocument &json, bool includeRefreshToken = true)
 {
@@ -41,7 +64,6 @@ boolean SendRequest(RequestType reqType, String fullEndPoint, String payload,
   {
 
     String requestType = RequestTypeToString(reqType);
-    String payload;
 
     serializeJson(json, payload);
     Serial.println("Sending payload...");
@@ -57,7 +79,7 @@ boolean SendRequest(RequestType reqType, String fullEndPoint, String payload,
 
     if (includeRefreshToken)
     {
-      client.println("Content-Type: application/json");
+      client.println("Cookie: refreshToken=someTokenValue\r\n");
     }
     client.print("Content-Length: ");
     client.println(payload.length());
@@ -80,18 +102,53 @@ boolean SendRequest(RequestType reqType, String fullEndPoint, String payload,
   return false;
 }
 
-bool isSuccessCode(int statusCode)
+// Attempt to grab a new refresh token, called whenever we get a 401 unauthorized.
+// Returns true if we are returned a new refresh token. Returns false otherwise, and
+// removes username and password credentials
+boolean PostRefresh(WiFiClientSecure &client, DynamicJsonDocument &json)
 {
-  return statusCode >= 200 && statusCode < 300;
+  const String FullEndPoint = "/auth/refresh";
+  client.setTimeout(30000);
+  int conn = client.connect(serverUri, serverPort);
+  if (conn == 1)
+  {
+    try
+    {
+
+      json.clear();
+
+      String payload;
+      // Do not send refresh token with login request, because we don't have one yet
+      boolean success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json, true);
+
+      if (!success)
+      {
+        return false;
+      }
+      CustomHeader headers = ReadHeaders(client, json);
+
+      JsonObject root_0 = ReadJson(client, json);
+      return true;
+    }
+
+    catch (const std::exception &e)
+    {
+      json.clear();
+
+      Serial.print("Exception caught: ");
+      Serial.println(e.what());
+    }
+    return false;
+  }
 }
 
-Headers ReadHeaders(WiFiClientSecure &client, DynamicJsonDocument &json)
+CustomHeader ReadHeaders(WiFiClientSecure &client, DynamicJsonDocument &json)
 {
   CustomContentType contentType = CustomContentType::None;
 
   bool contentIsPlainText = false;
   Serial.println("Reading headers...");
-  Headers myHeaders;
+  CustomHeader headers;
 
   while (client.connected())
   {
@@ -115,8 +172,15 @@ Headers ReadHeaders(WiFiClientSecure &client, DynamicJsonDocument &json)
       }
       else
       {
+
         String errorMessage = line;
         Serial.println("Error response: " + errorMessage);
+
+        if (statusCode == 401)
+        {
+          // unauthorized, call for refresh token
+          PostRefresh(client, json);
+        }
       }
     }
     else if (line.startsWith("Content-Type:"))
@@ -125,8 +189,7 @@ Headers ReadHeaders(WiFiClientSecure &client, DynamicJsonDocument &json)
       String contentTypeString = line.substring(line.indexOf(' ') + 1, line.length() - 1);
       Serial.println("Content-Type: " + contentTypeString);
       contentIsPlainText = (contentTypeString == "text/plain; charset=utf-8");
-      //myHeaders.ContentType =  contentTypeString;
-
+      // myHeaders.ContentType =  contentTypeString;
     }
     else
     {
@@ -135,19 +198,17 @@ Headers ReadHeaders(WiFiClientSecure &client, DynamicJsonDocument &json)
       { // check if the line has a ':' separator
         String key = line.substring(0, separatorIndex);
         String value = line.substring(separatorIndex + 1);
-      Serial.println("Setting Header: ");
-      Serial.println("Key: " + key);
-      Serial.println("Value: " + value);
+        Serial.println("Setting Header: ");
+        Serial.println("Key: " + key);
+        Serial.println("Value: " + value);
 
-
-
-        myHeaders.setHeader(key, value); // add the header as a key-value pair to the Headers object
+        headers.setHeader(key, value); // add the header as a key-value pair to the Headers object
       }
     }
   }
   Serial.println("...Reading headers [DONE]");
 
-  return myHeaders;
+  return headers;
 }
 
 String ReadPlainText(WiFiClientSecure &client)
@@ -164,24 +225,4 @@ String ReadPlainText(WiFiClientSecure &client)
   }
   Serial.println("Content body: " + content);
   return content;
-}
-
-JsonObject ReadJson(WiFiClientSecure &client, DynamicJsonDocument &json)
-{
-  DeserializationError error = deserializeJson(json, client);
-
-  if (error)
-  {
-    Serial.print(F("deserializeJson() failed: "));
-    Serial.println(error.c_str());
-    throw std::invalid_argument("Bad Json");
-  }
-
-  JsonObject root_0 = json[0];
-  return root_0;
-  // Serial.println(root_0);
-
-  // //  Get the Name:
-  // const char *root_0_name = root_0["name"];
-  // json.clear();
 }

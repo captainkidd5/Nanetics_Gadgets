@@ -30,7 +30,7 @@ void PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
       String payload;
       boolean success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json);
 
-      Headers headers = ReadHeaders(client, json);
+      CustomHeader headers = ReadHeaders(client, json);
       switch (headers.ContentType)
       {
       case CustomContentType::PlainText:

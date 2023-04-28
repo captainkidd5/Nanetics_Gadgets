@@ -9,6 +9,7 @@
 #include "Helpers.h"
 #include "CustomHeader.h"
 
+
 const String BaseEndPoint = "/auth";
 
 extern String s_username;
@@ -35,8 +36,7 @@ void PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json)
       //Do not send refresh token with login request, because we don't have one yet
       boolean success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json, false);
 
-      Headers headers = ReadHeaders(client, json);
-     
+      CustomHeader headers = ReadHeaders(client, json);
 
       
         JsonObject root_0 = ReadJson(client, json);
@@ -53,3 +53,5 @@ void PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json)
     }
   }
 }
+
+

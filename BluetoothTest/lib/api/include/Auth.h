@@ -12,6 +12,8 @@
 #include "Helpers.h"
 #include "CustomHeader.h"
 
-void PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json);
 
+
+void PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json);
+void PostRefresh(WiFiClientSecure &client, DynamicJsonDocument &json); 
 #endif

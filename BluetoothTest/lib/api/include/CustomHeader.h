@@ -1,12 +1,11 @@
-#ifndef CUSTOMER_HEADER
-#define CUSTOMER_HEADER
+#ifndef CUSTOM_HEADER
+#define CUSTOM_HEADER
+#include <Arduino.h>
 
 #include <ArduinoJson.h>
 #include <ArduinoJson.hpp>
 #include <WiFiClientSecure.h>
 #include <map>
-
-using namespace std;
 
 enum class CustomContentType {
   None,
@@ -14,15 +13,14 @@ enum class CustomContentType {
   JSON
 };
 
-class Headers {
+class CustomHeader {
 public:
-  CustomContentType ContentType;
-  Headers() {}
-
   void setHeader(String key, String value);
   String getHeader(String key) const;
+  CustomContentType ContentType;
 
 private:
   std::map<String, String> HeadersMap;
 };
-#endif
+
+#endif 
