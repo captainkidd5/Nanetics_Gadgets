@@ -6,6 +6,7 @@
 #include "Auth.h"
 // https://randomnerdtutorials.com/esp32-https-requests/
 
+bool loginSuccess = false;
 void ApiLoop(WiFiClientSecure &client, DynamicJsonDocument &json)
 {
 
@@ -14,7 +15,10 @@ void ApiLoop(WiFiClientSecure &client, DynamicJsonDocument &json)
     delay(10000);
 
    // PostRegisterDevice(client, json);
-   PostLogin(client,json);
+   if(!loginSuccess){
+    loginSuccess =  PostLogin(client,json);
+   }
+  
   }
   else
   {

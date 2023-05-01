@@ -24,7 +24,7 @@ extern String s_password;
 String RequestTypeToString(RequestType r);
 
 bool isSuccessCode(int statusCode);
-Headers ReadHeaders(WiFiClientSecure &client);
+Headers ParseHeaders(WiFiClientSecure &client);
 String ReadPlainText(WiFiClientSecure &client);
 JsonObject ReadJson(WiFiClientSecure &client,DynamicJsonDocument& json);
 #endif

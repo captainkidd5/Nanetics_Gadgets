@@ -8,30 +8,35 @@
 void SendJsonPayload(String payload,
                      WiFiClientSecure &client, DynamicJsonDocument &json)
 {
-    client.println("Content-Type: application/json");
+    size_t sizeT = serializeJson(json, payload);
+    String size = String(sizeT);
+
 
     client.print("Content-Length: ");
+    Serial.println("Content length is " + size);
     client.println(payload.length());
     client.println();
-    serializeJson(json, payload);
     Serial.println("Sending payload...");
     Serial.println("Payload is " + payload);
     client.println(payload);
     Serial.println("...Sending Payload [DONE]");
     json.clear();
 }
-bool SendRequest(RequestType reqType, String fullEndPoint, String payload,
-                    WiFiClientSecure &client, DynamicJsonDocument &json, bool includeRefreshToken = true)
+bool SendRequest(RequestType reqType, String fullEndPoint,
+                 WiFiClientSecure &client, DynamicJsonDocument &json, bool includeRefreshToken = true)
 {
-
+    String payload;
     String requestType = RequestTypeToString(reqType);
-    Serial.println("Sending new " + requestType + " request to endpoint " + fullEndPoint + "...");
     String uri = serverUri;
     uri = " https://" + uri;
     String full = requestType + uri + fullEndPoint + " HTTP/1.1";
+    Serial.println("Sending new " + requestType + " request to endpoint " + full + "...");
+
     client.println(full);
     client.println(String("Host: ") + serverUri);
-    client.println(F("Connection: close"));
+
+    client.println("Content-Type: application/json");
+
 
     if (includeRefreshToken)
     {
@@ -45,15 +50,17 @@ bool SendRequest(RequestType reqType, String fullEndPoint, String payload,
             Serial.println("Unable to retrieve refresh token value");
         }
     }
+    client.println(F("Connection: close"));
 
-    if (payload.length() > 0)
+    if (!json.isNull())
     {
         SendJsonPayload(payload, client, json);
     }
+    
+    Serial.println("...Sending new " + requestType + " request to endpoint " + full + " [DONE]");
 
     return true;
 }
-
 
 // Attempt to grab a new refresh token, called whenever we get a 401 unauthorized.
 // Returns true if we are returned a new refresh token. Returns false otherwise, and
@@ -68,17 +75,20 @@ bool PostRefresh(WiFiClientSecure &client, DynamicJsonDocument &json)
 
         json.clear();
 
-        String payload;
         // Do not send refresh token with login request, because we don't have one yet
-        bool success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json, true);
+        bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, true);
 
         if (!success)
-        {
             return false;
-        }
-        Headers headers = ReadHeaders(client);
 
-        JsonObject root_0 = ReadJson(client, json);
+        Headers headers = ParseHeaders(client);
+
+            // JsonObject root_0 = ReadJson(client, json);
+            // if(root_0.isNull()){
+
+            // }
+
+
         return true;
     }
     return false;

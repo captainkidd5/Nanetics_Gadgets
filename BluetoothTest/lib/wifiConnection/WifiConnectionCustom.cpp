@@ -45,9 +45,6 @@ void setupWifi(DynamicJsonDocument &json)
   //   // read configuration from FS json
   Serial.println("Mounting FS...");
 
-  try
-  {
-
     if (SPIFFS.begin())
     {
       if (SPIFFS.exists("/config.json"))
@@ -91,12 +88,7 @@ void setupWifi(DynamicJsonDocument &json)
         Serial.println("...Failed to mount FS");
       }
     }
-  }
-  catch (const std::exception &ex)
-  {
-    // code to handle the exception
-    Serial.println(ex.what());
-  }
+
   //   // end read
 
   //   // The extra parameters to be configured (can be either global or just in the setup)

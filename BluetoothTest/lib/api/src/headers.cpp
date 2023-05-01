@@ -57,8 +57,14 @@ void Headers::ParseHeaders(WiFiClientSecure &client)
 {
   Serial.println("Parsing headers...");
 
+while (client.connected())
+  {
   String line = client.readStringUntil('\n');
 
+  if (line == "\r") {
+      Serial.println("Response headers received");
+      return;
+    }
   if (line.startsWith("HTTP/1."))
     StatusCode = ParseStatusCode(line);
   
@@ -79,6 +85,7 @@ void Headers::ParseHeaders(WiFiClientSecure &client)
       SetHeader(key, value); // add the header as a key-value pair
     }
   }
+  }
 
   for (const auto &pair : HeadersMap)
   {
@@ -88,5 +95,5 @@ void Headers::ParseHeaders(WiFiClientSecure &client)
     Serial.println(pair.second);
   }
 
-  Serial.println("...Printing headers [DONE]");
+  Serial.println("...Parsing headers [DONE]");
 }

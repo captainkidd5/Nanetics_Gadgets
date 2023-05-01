@@ -28,10 +28,9 @@ void PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
 
       json["deviceHardWareId"] = macAddress;
 
-      String payload;
-      bool success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json);
+      bool success = SendRequest(RequestType::POST, FullEndPoint, client, json);
 
-      Headers headers = ReadHeaders(client);
+      Headers headers = ParseHeaders(client);
       switch (headers.ContentType)
       {
       case CustomContentType::PlainText:

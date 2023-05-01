@@ -14,38 +14,29 @@ const String BaseEndPoint = "/auth";
 
 extern String s_username;
 extern String s_password;
-void PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json)
+bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json)
 {
   const String FullEndPoint = BaseEndPoint + "/login";
   client.setTimeout(30000);
   int conn = client.connect(serverUri, serverPort);
   if (conn == 1)
   {
-    try
-    {
 
-      String macAddress = String(ESP.getEfuseMac());
-      json.clear();
+    json.clear();
 
-      json["email"] = s_username;
-      json["password"] = s_password;
-      Serial.println("Username is " + s_username);
-      Serial.println("Password is " + s_password);
-      String payload;
-      // Do not send refresh token with login request, because we don't have one yet
-      bool success = SendRequest(RequestType::POST, FullEndPoint, payload, client, json, false);
+    json["email"] = s_username;
+    json["password"] = s_password;
+    // Do not send refresh token with login request, because we don't have one yet
+    Serial.println("Sending login");
+    bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, false);
 
-      Headers headers = ReadHeaders(client);
+    Headers headers = ParseHeaders(client);
+      String response = client.readString();
+  Serial.println("Response body:");
+  Serial.println(response);
+    JsonObject root_0 = ReadJson(client, json);
 
-      JsonObject root_0 = ReadJson(client, json);
-    }
-
-    catch (const std::exception &e)
-    {
-      json.clear();
-
-      Serial.print("Exception caught: ");
-      Serial.println(e.what());
-    }
+    return success;
   }
+  return false;
 }

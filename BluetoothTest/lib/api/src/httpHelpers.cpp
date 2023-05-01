@@ -34,23 +34,35 @@ String RequestTypeToString(RequestType r)
     throw std::invalid_argument("Invalid request type.");
   }
 }
-
 JsonObject ReadJson(WiFiClientSecure &client, DynamicJsonDocument &json)
 {
   Serial.println("Attempting to deserialize JSON...");
-  DeserializationError error = deserializeJson(json, client);
-
-  if (error)
+  
+  if (client.available())
   {
-   Serial.println("...Attempting to deserialize JSON [FAILED]");
-
-    Serial.println(error.c_str());
+    DeserializationError error = deserializeJson(json, client);
+    if (error)
+    {
+      Serial.println("...Attempting to deserialize JSON [FAILED]");
+      Serial.println(error.c_str());
+    }
+    else if (json.isNull())
+    {
+      Serial.println("JSON is empty");
+    }
+    else
+    {
+      JsonObject root_0 = json[0];
+      return root_0;
+    }
   }
-
-  JsonObject root_0 = json[0];
-  return root_0;
+  else
+  {
+    Serial.println("No data available");
+  }
+  
+  return JsonObject();
 }
-
 bool isSuccessCode(int statusCode)
 {
   return statusCode >= 200 && statusCode < 300;
@@ -58,16 +70,13 @@ bool isSuccessCode(int statusCode)
 
 
 
-Headers ReadHeaders(WiFiClientSecure &client)
+Headers ParseHeaders(WiFiClientSecure &client)
 {
 
   Headers headers;
-  while (client.connected())
-  {
+  
     headers.ParseHeaders(client);
-    break;
     
-  }
 
   return headers;
 }

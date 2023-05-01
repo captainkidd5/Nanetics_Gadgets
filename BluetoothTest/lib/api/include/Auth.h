@@ -8,6 +8,6 @@
 
 
 
-void PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json);
+bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json);
 void PostRefresh(WiFiClientSecure &client, DynamicJsonDocument &json); 
 #endif
