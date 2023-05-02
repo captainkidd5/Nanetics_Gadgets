@@ -14,10 +14,10 @@ void ApiLoop(WiFiClientSecure &client, DynamicJsonDocument &json)
   {
     delay(10000);
 
-   // PostRegisterDevice(client, json);
-   if(!loginSuccess){
-    loginSuccess =  PostLogin(client,json);
-   }
+  //  // PostRegisterDevice(client, json);
+  //  if(!loginSuccess){
+  //   loginSuccess =  PostLogin(client,json);
+  //  }
   
   }
   else

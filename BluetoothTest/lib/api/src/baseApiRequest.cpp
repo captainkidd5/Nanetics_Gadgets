@@ -83,7 +83,7 @@ bool PostRefresh(WiFiClientSecure &client, DynamicJsonDocument &json)
 
         Headers headers = ParseHeaders(client);
 
-            // JsonObject root_0 = ReadJson(client, json);
+         
             // if(root_0.isNull()){
 
             // }

@@ -18,8 +18,8 @@ enum class RequestType{
   DELETE = 4
 };
 
-extern String s_username;
-extern String s_password;
+
+extern String s_refreshToken;
 
 String RequestTypeToString(RequestType r);
 

@@ -9,7 +9,10 @@
 #include <ArduinoJson.hpp>
 
 #include "HttpHelpers.h"
-
+#include "Helpers.h"
+#include "Auth.h"
+const bool shouldWipeFileSystemOnBoot = true;
+const bool shouldWipeWifiCredentialsOnBoot = true;
 // custom parameters with validation: https://github.com/tzapu/WiFiManager/issues/736
 //  define your default values here, if there are different values in config.json, they are overwritten.
 char username[48] = "USERNAME";
@@ -19,8 +22,7 @@ extern String s_password;
 // flag for saving data
 bool shouldSaveConfig = false;
 bool hasWifiCredentials = false;
-const bool shouldWipeFileSystemOnBoot = false;
-const bool shouldWipeWifiCredentialsOnBoot = false;
+
 
 // callback notifying us of the need to save config
 void saveConfigCallback()
@@ -30,7 +32,7 @@ void saveConfigCallback()
   shouldSaveConfig = true;
 }
 
-void setupWifi(DynamicJsonDocument &json)
+void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
 {
   WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
 
@@ -42,58 +44,8 @@ void setupWifi(DynamicJsonDocument &json)
     Serial.println("...Wiping FS [DONE]");
   }
 
-  //   // read configuration from FS json
-  Serial.println("Mounting FS...");
-
-    if (SPIFFS.begin())
-    {
-      if (SPIFFS.exists("/config.json"))
-      {
-        Serial.println("...Mounting FS [DONE]");
-
-        //  file exists, reading and loading
-        Serial.println("reading config file");
-        File configFile = SPIFFS.open("/config.json", "r");
-        if (configFile)
-        {
-          Serial.println("opened config file");
-          size_t size = configFile.size();
-          // Allocate a buffer to store contents of the file.
-          std::unique_ptr<char[]> buf(new char[size]);
-
-          configFile.readBytes(buf.get(), size);
-
-          DynamicJsonDocument json(1024);
-          auto deserializeError = deserializeJson(json, buf.get());
-          serializeJson(json, Serial);
-          if (!deserializeError)
-          {
-
-            Serial.println("\nparsed json");
-            strcpy(username, json["username"]);
-            strcpy(password, json["password"]);
-            s_username = username;
-            s_password = password;
-          }
-          else
-          {
-            Serial.println("failed to load json config");
-          }
-          configFile.close();
-        }
-      }
-
-      else
-      {
-        Serial.println("...Failed to mount FS");
-      }
-    }
-
-  //   // end read
-
   //   // The extra parameters to be configured (can be either global or just in the setup)
   //   // After connecting, parameter.getValue() will get you the configured value
-  //   // id/name placeholder/prompt default length
   WiFiManagerParameter user_name("username", "User Email Address", username, 48, "type=\"email\" required");
   WiFiManagerParameter pass_word("password", "Password", password, 48, "type= required");
 
@@ -104,9 +56,6 @@ void setupWifi(DynamicJsonDocument &json)
   //   // set config save notify callback
   wifiManager.setSaveConfigCallback(saveConfigCallback);
 
-  //   // set static ip
-
-  //   // add all your parameters here
   wifiManager.addParameter(&user_name);
   wifiManager.addParameter(&pass_word);
 
@@ -139,6 +88,7 @@ void setupWifi(DynamicJsonDocument &json)
     // ESP.restart();
     delay(5000);
   }
+     client.setCACert(root_ca);
 
   hasWifiCredentials = true;
   //   // if you get here you have connected to the WiFi
@@ -148,39 +98,42 @@ void setupWifi(DynamicJsonDocument &json)
 
   strcpy(username, user_name.getValue());
   strcpy(password, pass_word.getValue());
-  Serial.println("The values in the file are: ");
-  Serial.println("\tusername : " + String(username));
-  Serial.println("\tpassword : " + String(password));
+  String usrnm = username;
+  String psword = password;
 
-  //   // save the custom parameters to FS
-  if (shouldSaveConfig)
+  if (usrnm == "USERNAME" && psword == "PASSWORD")
   {
-    Serial.println("Saving config...");
+    // we autoconnected so the default values were not changed,
+    // we should assume that we have a refresh token now.
 
-    json["username"] = String(username);
-    json["password"] = String(password);
-    s_username = username;
-    s_password = password;
-    File configFile = SPIFFS.open("/config.json", "w");
-    if (!configFile)
-    {
-      Serial.println("failed to open config file for writing");
-    }
+    //   // read configuration from FS json
+    Serial.println("Mounting FS...");
+    std::map<String, String> myDict = {
+        {"refreshToken", ""}};
+    bool retrievedSPIIFS = retrieveSPIIFSValue(&myDict);
 
-    serializeJson(json, Serial);
-    serializeJson(json, configFile);
-    configFile.close();
-    if (!SPIFFS.exists("/config.json"))
-    {
-      Serial.println("SPIFFS DOES NOT EXIST!");
-    }
+    if (retrievedSPIIFS)
+      s_refreshToken = myDict["refreshToken"];
     else
-    {
-      Serial.println("Config file found");
-    }
-    json.clear();
+      Serial.println("Unable to retrieve refresh token");
   }
-  //     // end save
+  else
+  {
+    // else we need to send our username and password to auth login endpoint and grab
+    // the refresh token
+
+ if (WiFi.status() == WL_CONNECTED)
+  {
+    delay(10000);
+
+    bool loginSuccess = PostLogin(client, json, usrnm, psword);
+   if (loginSuccess)
+      Serial.println("Successfully logged in and stored refresh token.");
+    else
+      Serial.println("Problem logged in and stored refresh token.");
+  }
+ 
+  }
 
   Serial.println("local ip");
   Serial.println(WiFi.localIP());

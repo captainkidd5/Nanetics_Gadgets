@@ -44,7 +44,6 @@ CustomContentType ParseContentType(String line)
 {
   CustomContentType contentType = CustomContentType::PlainText;
   String contentTypeString = line.substring(line.indexOf(' ') + 1, line.length() - 1);
-  Serial.println("Content-Type: " + contentTypeString);
   bool contentIsPlainText = (contentTypeString == "text/plain; charset=utf-8");
   if (!contentIsPlainText)
   {
@@ -78,9 +77,9 @@ while (client.connected())
     { // check if the line has a ':' separator
       String key = line.substring(0, separatorIndex);
       String value = line.substring(separatorIndex + 1);
-      Serial.println("Setting Header: ");
-      Serial.println("Key: " + key);
-      Serial.println("Value: " + value);
+      // Serial.println("Setting Header: ");
+       Serial.println("Key: " + key);
+       Serial.println("Value: " + value);
 
       SetHeader(key, value); // add the header as a key-value pair
     }

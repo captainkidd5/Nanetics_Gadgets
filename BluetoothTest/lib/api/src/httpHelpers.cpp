@@ -15,8 +15,7 @@ enum class RequestType
   DELETE = 4
 };
 
-String s_username = "";
-String s_password = "";
+String s_refreshToken = "";
 
 String RequestTypeToString(RequestType r)
 {
@@ -63,6 +62,7 @@ JsonObject ReadJson(WiFiClientSecure &client, DynamicJsonDocument &json)
   
   return JsonObject();
 }
+
 bool isSuccessCode(int statusCode)
 {
   return statusCode >= 200 && statusCode < 300;

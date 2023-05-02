@@ -14,25 +14,6 @@
 WiFiClientSecure wifiClient;
 DynamicJsonDocument json(128);
 
-void setupWifiConnection(String wifiName, String wifiPass)
-{
-  // Initialize serial and wait for port to open:
-
-  WiFi.mode(WIFI_STA);
-  // Configures static IP address
-
-  WiFi.begin(wifiName.c_str(), wifiPass.c_str());
-  Serial.println("Connecting");
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("Connected to WiFi network with IP Address: ");
-  Serial.println(WiFi.localIP());
-
-}
 
 void setup()
 {
@@ -43,13 +24,12 @@ void setup()
     while(!Serial){}
     Serial.println("Booting up...");
  
-    setupWifi(json);
+    setupWifi(wifiClient,json);
+    hasWifiCredentials = true;
   }
 
-  setupWifiConnection(WiFi.SSID(), WiFi.psk());
   //setupIotConnection();
 
-     wifiClient.setCACert(root_ca);
 
 }
 
@@ -59,7 +39,7 @@ void loop()
   if (hasWifiCredentials)
   {
 
-    ApiLoop(wifiClient, json);
+    //ApiLoop(wifiClient, json);
     // IotLoop();
   }
     delay(1000);

@@ -12,6 +12,7 @@
 #include "HttpHelpers.h"
 
 extern bool hasWifiCredentials;
-void setupWifi(DynamicJsonDocument& json);
+void setupWifi(WiFiClientSecure &client,DynamicJsonDocument &json);
+
 
 #endif // _SETUPWIFI_H
