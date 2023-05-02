@@ -78,8 +78,8 @@ while (client.connected())
       String key = line.substring(0, separatorIndex);
       String value = line.substring(separatorIndex + 1);
       // Serial.println("Setting Header: ");
-       Serial.println("Key: " + key);
-       Serial.println("Value: " + value);
+      // Serial.println("Key: " + key);
+      // Serial.println("Value: " + value);
 
       SetHeader(key, value); // add the header as a key-value pair
     }

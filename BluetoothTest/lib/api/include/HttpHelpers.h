@@ -22,7 +22,7 @@ enum class RequestType{
 extern String s_refreshToken;
 
 String RequestTypeToString(RequestType r);
-
+void GetJsonDictionary(WiFiClientSecure &client, DynamicJsonDocument &json, std::map<String, String>& myDict);
 bool isSuccessCode(int statusCode);
 Headers ParseHeaders(WiFiClientSecure &client);
 String ReadPlainText(WiFiClientSecure &client);

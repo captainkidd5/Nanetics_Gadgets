@@ -12,7 +12,7 @@
 
 
 WiFiClientSecure wifiClient;
-DynamicJsonDocument json(128);
+DynamicJsonDocument json(1024);
 
 
 void setup()

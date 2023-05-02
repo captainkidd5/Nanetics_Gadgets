@@ -11,14 +11,13 @@
 #include "HttpHelpers.h"
 #include "Helpers.h"
 #include "Auth.h"
-const bool shouldWipeFileSystemOnBoot = true;
-const bool shouldWipeWifiCredentialsOnBoot = true;
+const bool shouldWipeFileSystemOnBoot = false;
+const bool shouldWipeWifiCredentialsOnBoot = false;
 // custom parameters with validation: https://github.com/tzapu/WiFiManager/issues/736
 //  define your default values here, if there are different values in config.json, they are overwritten.
-char username[48] = "USERNAME";
+char email[48] = "email@gmail.com";
 char password[48] = "PASSWORD";
-extern String s_username;
-extern String s_password;
+
 // flag for saving data
 bool shouldSaveConfig = false;
 bool hasWifiCredentials = false;
@@ -46,7 +45,7 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
 
   //   // The extra parameters to be configured (can be either global or just in the setup)
   //   // After connecting, parameter.getValue() will get you the configured value
-  WiFiManagerParameter user_name("username", "User Email Address", username, 48, "type=\"email\" required");
+  WiFiManagerParameter e_mail("email", "Email", email, 48, "type=\"email\" required");
   WiFiManagerParameter pass_word("password", "Password", password, 48, "type= required");
 
   //   // WiFiManager
@@ -56,7 +55,7 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
   //   // set config save notify callback
   wifiManager.setSaveConfigCallback(saveConfigCallback);
 
-  wifiManager.addParameter(&user_name);
+  wifiManager.addParameter(&e_mail);
   wifiManager.addParameter(&pass_word);
 
   if (shouldWipeWifiCredentialsOnBoot)
@@ -80,7 +79,8 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
   //   // if it does not connect it starts an access point with the specified name
   //   // here  "AutoConnectAP"
   //   // and goes into a blocking loop awaiting configuration
-  if (!wifiManager.autoConnect("AutoConnectAP", "password"))
+  //TODO: Randomize these for each unit and print on packaging
+  if (!wifiManager.autoConnect("NaneticsAp", "password"))
   {
     Serial.println("...Failed to connect and hit timeout");
     delay(3000);
@@ -96,12 +96,12 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
 
   //   // read updated parameters
 
-  strcpy(username, user_name.getValue());
+  strcpy(email, e_mail.getValue());
   strcpy(password, pass_word.getValue());
-  String usrnm = username;
+  String usrnm = email;
   String psword = password;
 
-  if (usrnm == "USERNAME" && psword == "PASSWORD")
+  if (usrnm == "email@gmail.com" && psword == "PASSWORD")
   {
     // we autoconnected so the default values were not changed,
     // we should assume that we have a refresh token now.
@@ -109,11 +109,11 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
     //   // read configuration from FS json
     Serial.println("Mounting FS...");
     std::map<String, String> myDict = {
-        {"refreshToken", ""}};
+        {"token", ""}};
     bool retrievedSPIIFS = retrieveSPIIFSValue(&myDict);
 
     if (retrievedSPIIFS)
-      s_refreshToken = myDict["refreshToken"];
+      s_refreshToken = myDict["token"];
     else
       Serial.println("Unable to retrieve refresh token");
   }

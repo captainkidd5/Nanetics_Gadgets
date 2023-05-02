@@ -12,7 +12,7 @@
 
 const String BaseEndPoint = "/auth";
 
-bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json, String userName, String passWord)
+bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json, String email, String passWord)
 {
   const String FullEndPoint = BaseEndPoint + "/login";
   client.setTimeout(30000);
@@ -22,43 +22,32 @@ bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json, String userN
 
     json.clear();
 
-    json["email"] = userName;
+    json["email"] = email;
     json["password"] = passWord;
     // Do not send refresh token with login request, because we don't have one yet
     Serial.println("Sending login");
     bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, false);
-    json.clear();
-/////////////
-   JsonObject root_0 = ReadJson(client, json);
-     String jsonString;
-          serializeJson(root_0, jsonString);
-          Serial.println(jsonString);
-        String tokenResponse = root_0["token"];
-    Serial.println("response is " + tokenResponse);
 
 
-    ////////
     Headers headers = ParseHeaders(client);
     if(!isSuccessCode(headers.StatusCode)){
       Serial.println("...Unable to login");
       return false;
     }
-    String response = client.readString();
-    Serial.println("RESPONESE IS " + response);
-    /////////
-    //  JsonObject root_0 = ReadJson(client, json);
-    //     String tokenResponse = root_0["token"];
-    // Serial.println("response is " + tokenResponse);
-    // std::map<String, String> myDict = {
-    //     {"refreshToken",tokenResponse}};
-        //////////
-    std::map<String, String> myDict = {
-        {"refreshToken", headers.GetHeader("token")}};
-        //Store refresh token in file system.
-    storeSPIFFSValue(&myDict);
-    retrieveSPIIFSValue(&myDict);
+     std::map<String, String> myDict;;
+GetJsonDictionary(client,json, myDict);
+     
+        if(myDict["token"] == "")
+        {
+          Serial.println("Unable to retrieve token value from json");
+          return false;
+        }
 
-    Serial.println("Stored refresh token is " + myDict["refreshToken"]);
+        //Store refresh token in file system
+    storeSPIFFSValue(&myDict);
+   // retrieveSPIIFSValue(&myDict);
+
+   // Serial.println("Stored refresh token is " + myDict["token"]);
     return success;
   }
   return false;

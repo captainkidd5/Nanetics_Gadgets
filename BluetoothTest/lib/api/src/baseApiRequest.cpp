@@ -29,7 +29,7 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
     String requestType = RequestTypeToString(reqType);
     String uri = serverUri;
     uri = " https://" + uri;
-    String full = requestType + uri + fullEndPoint + " HTTP/1.1";
+    String full = requestType + uri + fullEndPoint + " HTTP/1.0";
     Serial.println("Sending new " + requestType + " request to endpoint " + full + "...");
 
     client.println(full);
@@ -40,10 +40,12 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
 
     if (includeRefreshToken)
     {
-        String refreshTokenVal = "";
-        if (retrieveFlashValue("refreshToken", refreshTokenVal))
+           std::map<String, String> myDict = {
+        {"token",""}};
+
+        if (retrieveSPIIFSValue(&myDict))
         {
-            client.println("Cookie: refreshToken=" + refreshTokenVal + "\r\n");
+            client.println("Cookie: refreshToken=" + myDict["token"] + "\r\n");
         }
         else
         {

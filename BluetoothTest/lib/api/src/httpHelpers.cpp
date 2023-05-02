@@ -33,34 +33,65 @@ String RequestTypeToString(RequestType r)
     throw std::invalid_argument("Invalid request type.");
   }
 }
+
+
 JsonObject ReadJson(WiFiClientSecure &client, DynamicJsonDocument &json)
 {
   Serial.println("Attempting to deserialize JSON...");
   
   if (client.available())
   {
+    // Clear the JSON document before deserializing
+    json.clear();
+    
+    // Reserve memory for the JSON document to prevent overflow
+    size_t capacity = client.available();
     DeserializationError error = deserializeJson(json, client);
-    if (error)
+    
+    if (error || !json.is<JsonObject>())
     {
-      Serial.println("...Attempting to deserialize JSON [FAILED]");
+      // If there was an error, or if the JSON is not an object, print an error message
+      Serial.print("JSON deserialization error: ");
       Serial.println(error.c_str());
-    }
-    else if (json.isNull())
-    {
-      Serial.println("JSON is empty");
+      return JsonObject(); // Return an empty object to indicate failure
     }
     else
     {
-      JsonObject root_0 = json[0];
-      return root_0;
+      JsonObject root = json.as<JsonObject>(); // Get the root object
+      
+      // Check if the object has the expected keys or elements
+      // if (!root.containsKey("key1") || !root.containsKey("key2") || !root.containsKey("key3") || root.size() != 3)
+      // {
+      //   Serial.println("JSON object has unexpected structure");
+      //   return JsonObject(); // Return an empty object to indicate failure
+      // }
+      
+      return root; // Return the root object
     }
   }
   else
   {
     Serial.println("No data available");
+    return JsonObject(); // Return an empty object to indicate failure
   }
-  
-  return JsonObject();
+}
+
+/// @brief Fills dictionary reference with keys and values found in json document
+/// @param client 
+/// @param json 
+/// @param myDict 
+void GetJsonDictionary(WiFiClientSecure &client, DynamicJsonDocument &json, std::map<String, String>& myDict)
+{
+  JsonObject root_0 = ReadJson(client, json);
+  // Iterate through all key-value pairs in the JSON object
+  for (JsonPair pair : root_0)
+  {
+    // Get the key and value as strings
+    String key = pair.key().c_str();
+    String value = pair.value().as<String>();
+    // Add the key-value pair to the dictionary
+    myDict[key] = value;
+  }
 }
 
 bool isSuccessCode(int statusCode)
