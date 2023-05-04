@@ -37,7 +37,7 @@ String RequestTypeToString(RequestType r)
 
 JsonObject ReadJson(WiFiClientSecure &client, DynamicJsonDocument &json)
 {
-  Serial.println("Attempting to deserialize JSON...");
+ // Serial.print("Attempting to deserialize JSON...");
   
   if (client.available())
   {
@@ -65,7 +65,7 @@ JsonObject ReadJson(WiFiClientSecure &client, DynamicJsonDocument &json)
       //   Serial.println("JSON object has unexpected structure");
       //   return JsonObject(); // Return an empty object to indicate failure
       // }
-      
+     // Serial.println("...[DONE]");
       return root; // Return the root object
     }
   }
@@ -82,15 +82,22 @@ JsonObject ReadJson(WiFiClientSecure &client, DynamicJsonDocument &json)
 /// @param myDict 
 void GetJsonDictionary(WiFiClientSecure &client, DynamicJsonDocument &json, std::map<String, String>& myDict)
 {
-  JsonObject root_0 = ReadJson(client, json);
+  JsonObject root = ReadJson(client, json);
   // Iterate through all key-value pairs in the JSON object
-  for (JsonPair pair : root_0)
+  for (JsonPair pair : root)
   {
-    // Get the key and value as strings
+    // Get the key as a string
     String key = pair.key().c_str();
-    String value = pair.value().as<String>();
-    // Add the key-value pair to the dictionary
-    myDict[key] = value;
+    // Get the value as a string, boolean, or other type depending on the JSON data type
+    if (pair.value().is<bool>()) {
+      bool value = pair.value().as<bool>();
+      // Add the key-value pair to the dictionary
+      myDict[key] = value ? "true" : "false";
+    } else {
+      String value = pair.value().as<String>();
+      // Add the key-value pair to the dictionary
+      myDict[key] = value;
+    }
   }
 }
 

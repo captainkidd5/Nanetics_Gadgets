@@ -5,7 +5,7 @@
 #include <ArduinoJson.hpp>
 #include <WiFiClientSecure.h>
 
-
+bool GetIsRegistered(WiFiClientSecure &client, DynamicJsonDocument &json);
 void PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json);
 
 #endif

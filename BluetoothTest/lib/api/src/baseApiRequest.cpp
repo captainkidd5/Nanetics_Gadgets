@@ -11,13 +11,12 @@ void SendJsonPayload(String payload,
     size_t sizeT = serializeJson(json, payload);
     String size = String(sizeT);
 
-
     client.print("Content-Length: ");
     Serial.println("Content length is " + size);
     client.println(payload.length());
     client.println();
     Serial.println("Sending payload...");
-    Serial.println("Payload is " + payload);
+    Serial.print("Payload is " + payload);
     client.println(payload);
     Serial.println("...Sending Payload [DONE]");
     json.clear();
@@ -25,6 +24,13 @@ void SendJsonPayload(String payload,
 bool SendRequest(RequestType reqType, String fullEndPoint,
                  WiFiClientSecure &client, DynamicJsonDocument &json, bool includeRefreshToken = true)
 {
+
+
+    Serial.println("");
+    Serial.println("---------[BEGIN SEND REQUEST " + fullEndPoint + "]------------");
+
+    /// int remainingSpace = client.availableForWrite();
+    // Serial.println("Available space in buffer is " + String(remainingSpace));
     String payload;
     String requestType = RequestTypeToString(reqType);
     String uri = serverUri;
@@ -32,20 +38,26 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
     String full = requestType + uri + fullEndPoint + " HTTP/1.0";
     Serial.println("Sending new " + requestType + " request to endpoint " + full + "...");
 
+
     client.println(full);
+
+
     client.println(String("Host: ") + serverUri);
+
 
     client.println("Content-Type: application/json");
 
 
+
     if (includeRefreshToken)
     {
-           std::map<String, String> myDict = {
-        {"token",""}};
+        std::map<String, String> myDict = {
+            {"token", ""}};
 
         if (retrieveSPIIFSValue(&myDict))
         {
-            client.println("Cookie: refreshToken=" + myDict["token"] + "\r\n");
+            // client.println("Cookie: refreshToken=Bearer " + myDict["token"] + "\r\n");
+            client.println("refreshToken: " + myDict["token"] + "\r\n");
         }
         else
         {
@@ -58,8 +70,20 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
     {
         SendJsonPayload(payload, client, json);
     }
-    
-    Serial.println("...Sending new " + requestType + " request to endpoint " + full + " [DONE]");
+    client.flush();
+    Headers headers = ParseHeaders(client);
+
+    if (!isSuccessCode(headers.StatusCode))
+    {
+        Serial.println("Request unsuccessful " + headers.StatusCode);
+        return false;
+    }
+    Serial.println("Request Successful " + headers.StatusCode);
+    Serial.println("---------[END SEND REQUEST " + fullEndPoint + "]------------");
+
+    Serial.println("");
+
+    // Serial.println("...Sending new " + requestType + " request to endpoint " + full + " [DONE]");
 
     return true;
 }
@@ -85,11 +109,9 @@ bool PostRefresh(WiFiClientSecure &client, DynamicJsonDocument &json)
 
         Headers headers = ParseHeaders(client);
 
-         
-            // if(root_0.isNull()){
+        // if(root_0.isNull()){
 
-            // }
-
+        // }
 
         return true;
     }

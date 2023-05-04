@@ -22,7 +22,6 @@ char password[48] = "PASSWORD";
 bool shouldSaveConfig = false;
 bool hasWifiCredentials = false;
 
-
 // callback notifying us of the need to save config
 void saveConfigCallback()
 {
@@ -79,7 +78,7 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
   //   // if it does not connect it starts an access point with the specified name
   //   // here  "AutoConnectAP"
   //   // and goes into a blocking loop awaiting configuration
-  //TODO: Randomize these for each unit and print on packaging
+  // TODO: Randomize these for each unit and print on packaging
   if (!wifiManager.autoConnect("NaneticsAp", "password"))
   {
     Serial.println("...Failed to connect and hit timeout");
@@ -88,7 +87,7 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
     // ESP.restart();
     delay(5000);
   }
-     client.setCACert(root_ca);
+  client.setCACert(root_ca);
 
   hasWifiCredentials = true;
   //   // if you get here you have connected to the WiFi
@@ -122,17 +121,21 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
     // else we need to send our username and password to auth login endpoint and grab
     // the refresh token
 
- if (WiFi.status() == WL_CONNECTED)
-  {
-    delay(10000);
+    if (WiFi.status() == WL_CONNECTED)
+    {
+      delay(10000);
+  client.setTimeout(30000);
 
-    bool loginSuccess = PostLogin(client, json, usrnm, psword);
-   if (loginSuccess)
-      Serial.println("Successfully logged in and stored refresh token.");
-    else
-      Serial.println("Problem logged in and stored refresh token.");
-  }
- 
+      bool loginSuccess = PostLogin(client, json, usrnm, psword);
+      if (loginSuccess)
+        Serial.println("Successfully logged in and stored refresh token.");
+      else
+        Serial.println("Problem logged in and stored refresh token.");
+
+
+
+
+    }
   }
 
   Serial.println("local ip");

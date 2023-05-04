@@ -12,48 +12,62 @@
 
 const String BaseEndPoint = "/devices";
 
-void PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
+bool GetIsRegistered(WiFiClientSecure &client, DynamicJsonDocument &json)
 {
-  const String FullEndPoint = BaseEndPoint + "/RegistrationRequest";
-  client.setTimeout(30000);
+  String macAddress = String(ESP.getEfuseMac());
+
+  const String FullEndPoint = BaseEndPoint + "/isRegistered?hardwareId=" + macAddress;
   int conn = client.connect(serverUri, serverPort);
   if (conn == 1)
   {
-    try
+    bool success = SendRequest(RequestType::GET, FullEndPoint, client, json, false);
+    std::map<String, String> myDict;
+    GetJsonDictionary(client, json, myDict);
+  client.stop();
+
+    if (myDict["isRegistered"] == "")
     {
-
-      String macAddress = String(ESP.getEfuseMac());
-      // Serial.println("Hardware id is " + macAddress);
-      json.clear();
-
-      json["deviceHardWareId"] = macAddress;
-
-      bool success = SendRequest(RequestType::POST, FullEndPoint, client, json);
-
-      Headers headers = ParseHeaders(client);
-      switch (headers.ContentType)
-      {
-      case CustomContentType::PlainText:
-      {
-
-        String content = ReadPlainText(client);
-        break;
-      }
-
-      case CustomContentType::JSON:
-      {
-        JsonObject root_0 = ReadJson(client, json);
-        break;
-      }
-      }
+      Serial.println("No value found for is registered");
+      return false;
     }
-
-    catch (const std::exception &e)
+    else if (myDict["isRegistered"] == "false")
     {
-      json.clear();
-
-      Serial.print("Exception caught: ");
-      Serial.println(e.what());
+      //Serial.println("Not registered!");
+      return false;
+    }
+    else if (myDict["isRegistered"] == "true")
+    {
+      Serial.println("IS registered!");
+      return true;
+    }
+    else
+    {
+      Serial.println("Uhhh" + myDict["isRegistered"]);
     }
   }
+
+  return false;
+}
+void PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
+{
+  const String FullEndPoint = BaseEndPoint + "/RegistrationRequest";
+  int conn = client.connect(serverUri, serverPort);
+  if (conn == 1)
+  {
+    json.clear();
+    // Get the MAC address as a string
+    String macAddress = String(ESP.getEfuseMac());
+    // Convert the string to a ulong
+     unsigned long long macAddressUlong = strtoull(macAddress.c_str(), NULL, 16);
+    // Add the MAC address as a ulong to the JSON object
+    json["deviceHardWareId"] = 45430;
+
+    bool success = SendRequest(RequestType::POST, FullEndPoint, client, json);
+
+    if (success)
+    {
+      Serial.println("Device registered");
+    }
+  }
+  client.stop();
 }

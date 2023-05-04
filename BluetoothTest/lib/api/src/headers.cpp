@@ -54,7 +54,7 @@ CustomContentType ParseContentType(String line)
 }
 void Headers::ParseHeaders(WiFiClientSecure &client)
 {
-  Serial.println("Parsing headers...");
+  Serial.print("Parsing headers...");
 
 while (client.connected())
   {

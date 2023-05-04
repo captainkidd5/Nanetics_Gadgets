@@ -19,54 +19,7 @@ void printAvailableMemory()
   Serial.println(" bytes");
 }
 
-bool storeFlashValue(String key, String value)
-{
-  Serial.println("Attemping to store flash key []" + key + "] with value [" + value + "]...");
-  if (!preferences.begin("storage", false))
-  {
-    // Failed to open the partition, return an empty string
-    Serial.println("...Attemping to store flash key []" + key + "] with value [" + value + "] [UNABLE TO OPEN PREFERENCES]");
 
-    return false;
-  }
-
-  preferences.putString(key.c_str(), value);
-  Serial.println("...Attemping to store flash key []" + key + "] with value [" + value + "] [SUCCESS]");
-
-  // Close the preferences partition
-  preferences.end();
-  return true;
-}
-
-// Returns true if flash value was found, value is stored in outResult.
-// Returns false otherwise.
-bool retrieveFlashValue(String key, String &outResult)
-{
-  Serial.println("Attemping to retrieve flash key []" + key + "]...");
-
-  if (!preferences.begin("storage", false))
-  {
-    Serial.println("...Attemping to retrieve flash key []" + key + "] [UNABLE TO OPEN PREFERENCES]");
-
-    // Failed to open the partition, return an empty string
-    return false;
-  }
-  preferences.begin("storage", false);
-  String defaultVal = "NOTFOUND";
-  outResult = preferences.getString(key.c_str(), "NOTFOUND");
-  preferences.end();
-
-  if (outResult == defaultVal)
-  {
-    Serial.println("...Attemping to retrieve flash key []" + key + "] [NOT FOUND]");
-
-    return false;
-  }
-
-  Serial.println("...Attemping to retrieve flash key []" + key + "] [SUCCESS, value is [" + outResult + "]");
-
-  return true;
-}
 bool retrieveSPIIFSValue(std::map<String, String>* dict)
 {
   bool returnVal = false;
@@ -90,7 +43,7 @@ bool retrieveSPIIFSValue(std::map<String, String>* dict)
 
         DynamicJsonDocument json(1024);
         auto deserializeError = deserializeJson(json, buf.get());
-        serializeJson(json, Serial);
+       // serializeJson(json, Serial);
         if (!deserializeError)
         {
           Serial.println("\nparsed json");

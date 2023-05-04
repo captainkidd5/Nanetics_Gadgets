@@ -15,7 +15,6 @@ const String BaseEndPoint = "/auth";
 bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json, String email, String passWord)
 {
   const String FullEndPoint = BaseEndPoint + "/login";
-  client.setTimeout(30000);
   int conn = client.connect(serverUri, serverPort);
   if (conn == 1)
   {
@@ -25,16 +24,11 @@ bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json, String email
     json["email"] = email;
     json["password"] = passWord;
     // Do not send refresh token with login request, because we don't have one yet
-    Serial.println("Sending login");
     bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, false);
 
 
-    Headers headers = ParseHeaders(client);
-    if(!isSuccessCode(headers.StatusCode)){
-      Serial.println("...Unable to login");
-      return false;
-    }
-     std::map<String, String> myDict;;
+  
+     std::map<String, String> myDict;
 GetJsonDictionary(client,json, myDict);
      
         if(myDict["token"] == "")
@@ -48,6 +42,8 @@ GetJsonDictionary(client,json, myDict);
    // retrieveSPIIFSValue(&myDict);
 
    // Serial.println("Stored refresh token is " + myDict["token"]);
+  client.stop();
+
     return success;
   }
   return false;
