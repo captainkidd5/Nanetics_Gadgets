@@ -34,6 +34,13 @@ String RequestTypeToString(RequestType r)
   }
 }
 
+void AppendHeader(WiFiClientSecure &client, String key, String value){
+
+
+            Serial.println("Appending header... " + key + value);
+            client.println(key + value + "\r\n");
+   
+}
 
 JsonObject ReadJson(WiFiClientSecure &client, DynamicJsonDocument &json)
 {
@@ -118,7 +125,22 @@ Headers ParseHeaders(WiFiClientSecure &client)
 
   return headers;
 }
+String ParseSetCookie(Headers &headers){
 
+  Serial.println("Parsing Set Cookie...");
+  String value = "";
+
+  String setCookieVal = headers.GetHeader("Set-Cookie");
+  if(setCookieVal == "")
+    Serial.println("Set-Cookie has no value!");
+
+int start = setCookieVal.indexOf('=') + 1;  // Find the start index of the token value
+int end = setCookieVal.indexOf(';');       // Find the end index of the token value
+
+value = setCookieVal.substring(start, end);
+   Serial.println("Parsed token is " + value);
+   return value;
+}
 String ReadPlainText(WiFiClientSecure &client)
 {
   Serial.println("reading plaintext body...");

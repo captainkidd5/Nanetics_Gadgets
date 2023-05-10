@@ -4,6 +4,9 @@
 #include "HttpHelpers.h"
 #include "Helpers.h"
 #include "Headers.h"
+#include "ResponseObject.h"
+const byte _maxFailedAttempts = 7;
+
 // Sends a json payload in the body of the http request
 void SendJsonPayload(String payload,
                      WiFiClientSecure &client, DynamicJsonDocument &json)
@@ -21,10 +24,10 @@ void SendJsonPayload(String payload,
     Serial.println("...Sending Payload [DONE]");
     json.clear();
 }
-bool SendRequest(RequestType reqType, String fullEndPoint,
-                 WiFiClientSecure &client, DynamicJsonDocument &json, bool includeRefreshToken = true)
-{
 
+bool Send(RequestType reqType, String fullEndPoint,
+          WiFiClientSecure &client, DynamicJsonDocument &json, bool includeAccessToken, ResponseObject &responseObj)
+{
 
     Serial.println("");
     Serial.println("---------[BEGIN SEND REQUEST " + fullEndPoint + "]------------");
@@ -38,30 +41,24 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
     String full = requestType + uri + fullEndPoint + " HTTP/1.0";
     Serial.println("Sending new " + requestType + " request to endpoint " + full + "...");
 
-
     client.println(full);
-
 
     client.println(String("Host: ") + serverUri);
 
-
     client.println("Content-Type: application/json");
 
-
-
-    if (includeRefreshToken)
+    if (includeAccessToken)
     {
         std::map<String, String> myDict = {
             {"token", ""}};
 
         if (retrieveSPIIFSValue(&myDict))
         {
-            // client.println("Cookie: refreshToken=Bearer " + myDict["token"] + "\r\n");
-            client.println("refreshToken: " + myDict["token"] + "\r\n");
+            AppendHeader(client, "Authorization: Bearer ", myDict["token"]);
         }
         else
         {
-            Serial.println("Unable to retrieve refresh token value");
+            Serial.println("Unable to retrieve access token value");
         }
     }
     client.println(F("Connection: close"));
@@ -73,11 +70,14 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
     client.flush();
     Headers headers = ParseHeaders(client);
 
+    responseObj.header = headers;
+
     if (!isSuccessCode(headers.StatusCode))
     {
-        Serial.println("Request unsuccessful " + headers.StatusCode);
         return false;
     }
+    GetJsonDictionary(client, json, responseObj.jsonDictionary);
+
     Serial.println("Request Successful " + headers.StatusCode);
     Serial.println("---------[END SEND REQUEST " + fullEndPoint + "]------------");
 
@@ -88,32 +88,49 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
     return true;
 }
 
-// Attempt to grab a new refresh token, called whenever we get a 401 unauthorized.
-// Returns true if we are returned a new refresh token. Returns false otherwise, and
-// removes username and password credentials
-bool PostRefresh(WiFiClientSecure &client, DynamicJsonDocument &json)
+bool SendRequest(RequestType reqType, String fullEndPoint,
+                 WiFiClientSecure &client, DynamicJsonDocument &json,
+                 ResponseObject &responseObj, bool includeAccessToken = true)
 {
-    const String FullEndPoint = "/auth/refresh";
-    client.setTimeout(30000);
-    int conn = client.connect(serverUri, serverPort);
-    if (conn == 1)
-    {
+    byte _failedAttempts = 0;
 
+    int statusCode = 400;
+    bool reqSucceeded = Send(reqType, fullEndPoint, client, json, includeAccessToken,responseObj);
+
+    if (reqSucceeded)
+        return true;
+    if (statusCode = 401)
+    {
         json.clear();
 
-        // Do not send refresh token with login request, because we don't have one yet
-        bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, true);
+        bool refreshSuccess = Send(RequestType::POST, "/auth/refresh", client, json, false,responseObj);
 
-        if (!success)
-            return false;
+        if (refreshSuccess)
+        {
+         
+            if (responseObj.jsonDictionary["token"] == "")
+            {
+                Serial.println("Unable to retrieve ACCESS token value from json");
+                return false;
+            }
 
-        Headers headers = ParseHeaders(client);
+            bool storedValue = storeSPIFFSValue(&responseObj.jsonDictionary);
 
-        // if(root_0.isNull()){
+            if (storedValue)
+            {
+                Serial.println("Stored access token");
+                return true;
+            }
+            // Refresh token valid, Access token is good again, retry request
+            bool attempt2Success = Send(reqType, fullEndPoint, client, json, includeAccessToken, responseObj);
 
-        // }
-
-        return true;
+            return attempt2Success;
+        }
+        else
+        {
+            // user needs to log in again
+            Serial.println("User must log in again!");
+        }
     }
     return false;
 }

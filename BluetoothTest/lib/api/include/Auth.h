@@ -9,5 +9,4 @@
 
 
 bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json, String userName, String passWord);
-void PostRefresh(WiFiClientSecure &client, DynamicJsonDocument &json); 
 #endif

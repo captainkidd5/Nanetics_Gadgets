@@ -11,12 +11,12 @@
 #include "HttpHelpers.h"
 #include "Helpers.h"
 #include "Auth.h"
-const bool shouldWipeFileSystemOnBoot = false;
-const bool shouldWipeWifiCredentialsOnBoot = false;
+const bool shouldWipeFileSystemOnBoot = true;
+const bool shouldWipeWifiCredentialsOnBoot = true;
 // custom parameters with validation: https://github.com/tzapu/WiFiManager/issues/736
 //  define your default values here, if there are different values in config.json, they are overwritten.
-char email[48] = "email@gmail.com";
-char password[48] = "PASSWORD";
+char email[48] = "waiikipomm@gmail.com";
+char password[48] = "Runescape1!";
 
 // flag for saving data
 bool shouldSaveConfig = false;
@@ -111,6 +111,7 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
         {"token", ""}};
     bool retrievedSPIIFS = retrieveSPIIFSValue(&myDict);
 
+
     if (retrievedSPIIFS)
       s_refreshToken = myDict["token"];
     else
@@ -123,7 +124,7 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
 
     if (WiFi.status() == WL_CONNECTED)
     {
-      delay(10000);
+      delay(1200);
   client.setTimeout(30000);
 
       bool loginSuccess = PostLogin(client, json, usrnm, psword);

@@ -52,12 +52,16 @@ CustomContentType ParseContentType(String line)
 
   return contentType;
 }
+
+
 void Headers::ParseHeaders(WiFiClientSecure &client)
 {
   Serial.print("Parsing headers...");
-
+delay(1500);
 while (client.connected())
   {
+  Serial.print("...");
+
   String line = client.readStringUntil('\n');
 
   if (line == "\r") {
@@ -77,9 +81,8 @@ while (client.connected())
     { // check if the line has a ':' separator
       String key = line.substring(0, separatorIndex);
       String value = line.substring(separatorIndex + 1);
-      // Serial.println("Setting Header: ");
-      // Serial.println("Key: " + key);
-      // Serial.println("Value: " + value);
+       Serial.println("Key: " + key);
+       Serial.println("Value: " + value);
 
       SetHeader(key, value); // add the header as a key-value pair
     }

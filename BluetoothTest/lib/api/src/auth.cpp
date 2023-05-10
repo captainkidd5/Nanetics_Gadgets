@@ -26,23 +26,22 @@ bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json, String email
     // Do not send refresh token with login request, because we don't have one yet
     bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, false);
 
-
-  
-     std::map<String, String> myDict;
-GetJsonDictionary(client,json, myDict);
-     
-        if(myDict["token"] == "")
-        {
-          Serial.println("Unable to retrieve token value from json");
-          return false;
-        }
-
-        //Store refresh token in file system
+//Refresh token is always stored as a header
+    Headers headers = ParseHeaders(client);
+String rToken = ParseSetCookie(headers);
+    if (rToken == "")
+    {
+      Serial.println("Unable to retrieve REFRESH token value from HEADERS");
+      return false;
+    }
+    std::map<String, String> myDict;
+    myDict["refreshToken"] = rToken;
+    // Store refresh token in file system
     storeSPIFFSValue(&myDict);
-   // retrieveSPIIFSValue(&myDict);
+    retrieveSPIIFSValue(&myDict);
 
-   // Serial.println("Stored refresh token is " + myDict["token"]);
-  client.stop();
+    Serial.println("Stored refresh token is " + myDict["refreshToken"]);
+    client.stop();
 
     return success;
   }

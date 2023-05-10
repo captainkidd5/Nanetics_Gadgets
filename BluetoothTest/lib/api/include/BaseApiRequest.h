@@ -6,6 +6,7 @@
 #include "HttpHelpers.h"
 
 bool SendRequest(RequestType reqType, String fullEndPoint,
- WiFiClientSecure &client, DynamicJsonDocument &json,bool includeRefreshToken = true);
+                 WiFiClientSecure &client, DynamicJsonDocument &json,
+                 ResponseObject &responseObj, bool includeAccessToken = true);
 
  #endif
