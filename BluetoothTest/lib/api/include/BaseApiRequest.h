@@ -4,6 +4,7 @@
 #include <ArduinoJson.hpp>
 #include <WiFiClientSecure.h>
 #include "HttpHelpers.h"
+#include "ResponseObject.h"
 
 bool SendRequest(RequestType reqType, String fullEndPoint,
                  WiFiClientSecure &client, DynamicJsonDocument &json,

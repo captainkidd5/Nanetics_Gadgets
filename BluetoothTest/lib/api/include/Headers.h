@@ -15,6 +15,7 @@ enum class CustomContentType {
 //const means cannot modify state of headers class
 class Headers {
 public:
+void ClearHeaders();
   void SetHeader(String key, String value);
   String GetHeader(String key) const;
   void ParseHeaders(WiFiClientSecure &client);

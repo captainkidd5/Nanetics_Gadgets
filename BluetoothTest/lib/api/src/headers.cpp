@@ -24,7 +24,6 @@ String Headers::GetHeader(String key) const
   }
 }
 
-
 int ParseStatusCode(String line)
 {
   int statusCode = line.substring(line.indexOf(' ') + 1, line.indexOf(' ') + 4).toInt();
@@ -52,41 +51,54 @@ CustomContentType ParseContentType(String line)
 
   return contentType;
 }
-
-
+void Headers::ClearHeaders(){
+  HeadersMap.clear();
+}
 void Headers::ParseHeaders(WiFiClientSecure &client)
 {
   Serial.print("Parsing headers...");
-delay(1500);
-while (client.connected())
+  delay(1500);
+  while (client.connected())
   {
-  Serial.print("...");
+    Serial.print("...");
 
-  String line = client.readStringUntil('\n');
+    String line = client.readStringUntil('\n');
 
-  if (line == "\r") {
+    if (line == "\r")
+    {
       Serial.println("Response headers received");
       return;
     }
-  if (line.startsWith("HTTP/1."))
-    StatusCode = ParseStatusCode(line);
-  
-  else if (line.startsWith("Content-Type:"))
-    ContentType = ParseContentType(line);
-  
-  else
-  {
-    int separatorIndex = line.indexOf(':');
-    if (separatorIndex != -1)
-    { // check if the line has a ':' separator
-      String key = line.substring(0, separatorIndex);
-      String value = line.substring(separatorIndex + 1);
-       Serial.println("Key: " + key);
-       Serial.println("Value: " + value);
+    if (line.startsWith("HTTP/1."))
+      StatusCode = ParseStatusCode(line);
 
-      SetHeader(key, value); // add the header as a key-value pair
+    else if (line.startsWith("Content-Type:"))
+      ContentType = ParseContentType(line);
+
+    else
+    {
+      int separatorIndex = line.indexOf(':');
+      if (separatorIndex != -1)
+      { // check if the line has a ':' separator
+        String key = line.substring(0, separatorIndex);
+        String value = line.substring(separatorIndex + 1);
+        Serial.println("Key:" + key);
+        Serial.println("Value:" + value);
+        if (key == "Set-Cookie")
+        {
+          String firstChars = value.substring(0,10);
+          Serial.println("First characters are " + firstChars);
+          Serial.println("key started with set cookie...");
+          // We only want to parse refresh token Set-Cookie
+          if (!value.startsWith(" refreshToken"))
+            continue;
+          else
+            Serial.println("Value DID start with refreshtoken!");
+        }
+
+        SetHeader(key, value); // add the header as a key-value pair
+      }
     }
-  }
   }
 
   for (const auto &pair : HeadersMap)

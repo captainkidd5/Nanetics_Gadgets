@@ -14,6 +14,8 @@ const String BaseEndPoint = "/auth";
 
 bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json, String email, String passWord)
 {
+  ResponseObject responseObj;
+
   const String FullEndPoint = BaseEndPoint + "/login";
   int conn = client.connect(serverUri, serverPort);
   if (conn == 1)
@@ -24,11 +26,10 @@ bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json, String email
     json["email"] = email;
     json["password"] = passWord;
     // Do not send refresh token with login request, because we don't have one yet
-    bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, false);
+    bool success = SendRequest(RequestType::POST, FullEndPoint, client, json,responseObj, false);
 
 //Refresh token is always stored as a header
-    Headers headers = ParseHeaders(client);
-String rToken = ParseSetCookie(headers);
+String rToken = ParseSetCookie(responseObj.header);
     if (rToken == "")
     {
       Serial.println("Unable to retrieve REFRESH token value from HEADERS");
@@ -41,7 +42,6 @@ String rToken = ParseSetCookie(headers);
     retrieveSPIIFSValue(&myDict);
 
     Serial.println("Stored refresh token is " + myDict["refreshToken"]);
-    client.stop();
 
     return success;
   }

@@ -26,7 +26,7 @@ void SendJsonPayload(String payload,
 }
 
 bool Send(RequestType reqType, String fullEndPoint,
-          WiFiClientSecure &client, DynamicJsonDocument &json, bool includeAccessToken, ResponseObject &responseObj)
+          WiFiClientSecure &client, DynamicJsonDocument &json, bool includeAccessToken, ResponseObject &responseObj, bool includeRefreshToken = false)
 {
 
     Serial.println("");
@@ -53,13 +53,19 @@ bool Send(RequestType reqType, String fullEndPoint,
             {"token", ""}};
 
         if (retrieveSPIIFSValue(&myDict))
-        {
             AppendHeader(client, "Authorization: Bearer ", myDict["token"]);
-        }
         else
-        {
             Serial.println("Unable to retrieve access token value");
-        }
+    }
+     if (includeRefreshToken)
+    {
+        std::map<String, String> myDict = {
+            {"refreshToken", ""}};
+
+        if (retrieveSPIIFSValue(&myDict))
+            AppendHeader(client, "Cookie: refreshToken=", myDict["refreshToken"]);
+        else
+            Serial.println("Unable to retrieve refresh token value");
     }
     client.println(F("Connection: close"));
 
@@ -67,6 +73,8 @@ bool Send(RequestType reqType, String fullEndPoint,
     {
         SendJsonPayload(payload, client, json);
     }
+    //client.flush() ensures all data is sent to the server. Should be called after all desired data is sent
+    //but before the response is read
     client.flush();
     Headers headers = ParseHeaders(client);
 
@@ -96,18 +104,23 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
 
     int statusCode = 400;
     bool reqSucceeded = Send(reqType, fullEndPoint, client, json, includeAccessToken,responseObj);
+    //client.stop() Should be called after response is read. If this is not called, we get that
+    //annoying unknown ssl error
+    client.stop();
 
     if (reqSucceeded)
         return true;
+
     if (statusCode = 401)
     {
         json.clear();
-
-        bool refreshSuccess = Send(RequestType::POST, "/auth/refresh", client, json, false,responseObj);
+responseObj.jsonDictionary.clear();
+responseObj.header.ClearHeaders();
+        bool refreshSuccess = Send(RequestType::POST, "/auth/refresh", client, json, false,responseObj,true);
 
         if (refreshSuccess)
         {
-         
+         Serial.println("Refresh success");
             if (responseObj.jsonDictionary["token"] == "")
             {
                 Serial.println("Unable to retrieve ACCESS token value from json");
