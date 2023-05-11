@@ -55,7 +55,12 @@ bool Send(RequestType reqType, String fullEndPoint,
         if (retrieveSPIIFSValue(&myDict))
             AppendHeader(client, "Authorization: Bearer ", myDict["token"]);
         else
+        {
             Serial.println("Unable to retrieve access token value");
+responseObj.header.StatusCode = 401;
+client.flush();
+return false;
+        }
     }
     if (includeRefreshToken)
     {
@@ -145,17 +150,28 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
             if (storedValue)
             {
                 Serial.println("Stored access token");
-                return true;
             }
             else
             {
                 Serial.println("Unable to store access token");
                 return false;
             }
-            // Refresh token valid, Access token is good again, retry request
-            bool attempt2Success = Send(reqType, fullEndPoint, client, json, includeAccessToken, responseObj);
 
-            return attempt2Success;
+            // Refresh token valid, Access token is good again, retry request
+            json.clear();
+            responseObj.jsonDictionary.clear();
+            responseObj.header.ClearHeaders();
+            conn = client.connect(serverUri, serverPort);
+            bool refreshSuccess;
+            if (conn == 1)
+            {
+                Serial.println("Reattempting request at endpoint " + fullEndPoint);
+                bool attempt2Success = Send(reqType, fullEndPoint, client, json, includeAccessToken, responseObj);
+                Serial.println("Reattempting request: " + attempt2Success);
+            client.stop();
+
+                return attempt2Success;
+            }
         }
         else
         {
