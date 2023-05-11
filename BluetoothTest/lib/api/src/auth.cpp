@@ -17,33 +17,31 @@ bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json, String email
   ResponseObject responseObj;
 
   const String FullEndPoint = BaseEndPoint + "/login";
-  int conn = client.connect(serverUri, serverPort);
-  if (conn == 1)
+
+  json.clear();
+
+  json["email"] = email;
+  json["password"] = passWord;
+  // Do not send refresh token with login request, because we don't have one yet
+  bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, responseObj, false);
+
+  if (!success)
+    return false;
+  // Refresh token is always stored as a header
+  String rToken = ParseSetCookie(responseObj.header);
+  if (rToken == "")
   {
-
-    json.clear();
-
-    json["email"] = email;
-    json["password"] = passWord;
-    // Do not send refresh token with login request, because we don't have one yet
-    bool success = SendRequest(RequestType::POST, FullEndPoint, client, json,responseObj, false);
-
-//Refresh token is always stored as a header
-String rToken = ParseSetCookie(responseObj.header);
-    if (rToken == "")
-    {
-      Serial.println("Unable to retrieve REFRESH token value from HEADERS");
-      return false;
-    }
-    std::map<String, String> myDict;
-    myDict["refreshToken"] = rToken;
-    // Store refresh token in file system
-    storeSPIFFSValue(&myDict);
-    retrieveSPIIFSValue(&myDict);
-
-    Serial.println("Stored refresh token is " + myDict["refreshToken"]);
-
-    return success;
+    Serial.println("Unable to retrieve REFRESH token value from HEADERS");
+    return false;
   }
-  return false;
+  std::map<String, String> myDict;
+  myDict["refreshToken"] = rToken;
+  // Store refresh token in file system
+  storeSPIFFSValue(&myDict);
+  retrieveSPIIFSValue(&myDict);
+
+  Serial.println("Stored refresh token is " + myDict["refreshToken"]);
+
+  return true;
+
 }

@@ -104,7 +104,13 @@ void GetJsonDictionary(WiFiClientSecure &client, DynamicJsonDocument &json, std:
       String value = pair.value().as<String>();
       // Add the key-value pair to the dictionary
       myDict[key] = value;
+
     }
+
+      Serial.println("Json Key:" + key + " value:" +  myDict[key]);
+
+
+
   }
 }
 

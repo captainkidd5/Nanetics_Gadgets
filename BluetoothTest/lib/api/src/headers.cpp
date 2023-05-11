@@ -82,18 +82,15 @@ void Headers::ParseHeaders(WiFiClientSecure &client)
       { // check if the line has a ':' separator
         String key = line.substring(0, separatorIndex);
         String value = line.substring(separatorIndex + 1);
-        Serial.println("Key:" + key);
-        Serial.println("Value:" + value);
+       // Serial.println("Key:" + key);
+      //  Serial.println("Value:" + value);
         if (key == "Set-Cookie")
         {
-          String firstChars = value.substring(0,10);
-          Serial.println("First characters are " + firstChars);
-          Serial.println("key started with set cookie...");
-          // We only want to parse refresh token Set-Cookie
-          if (!value.startsWith(" refreshToken"))
+
+          // We only want to parse refresh token or authorization Set-Cookie
+          if (!value.startsWith(" refreshToken") && !value.startsWith(" Authorization"))
             continue;
-          else
-            Serial.println("Value DID start with refreshtoken!");
+
         }
 
         SetHeader(key, value); // add the header as a key-value pair

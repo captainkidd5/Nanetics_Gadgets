@@ -57,7 +57,7 @@ bool Send(RequestType reqType, String fullEndPoint,
         else
             Serial.println("Unable to retrieve access token value");
     }
-     if (includeRefreshToken)
+    if (includeRefreshToken)
     {
         std::map<String, String> myDict = {
             {"refreshToken", ""}};
@@ -73,18 +73,18 @@ bool Send(RequestType reqType, String fullEndPoint,
     {
         SendJsonPayload(payload, client, json);
     }
-    //client.flush() ensures all data is sent to the server. Should be called after all desired data is sent
-    //but before the response is read
+    // client.flush() ensures all data is sent to the server. Should be called after all desired data is sent
+    // but before the response is read
     client.flush();
     Headers headers = ParseHeaders(client);
 
     responseObj.header = headers;
+    GetJsonDictionary(client, json, responseObj.jsonDictionary);
 
     if (!isSuccessCode(headers.StatusCode))
     {
         return false;
     }
-    GetJsonDictionary(client, json, responseObj.jsonDictionary);
 
     Serial.println("Request Successful " + headers.StatusCode);
     Serial.println("---------[END SEND REQUEST " + fullEndPoint + "]------------");
@@ -102,37 +102,55 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
 {
     byte _failedAttempts = 0;
 
-    int statusCode = 400;
-    bool reqSucceeded = Send(reqType, fullEndPoint, client, json, includeAccessToken,responseObj);
-    //client.stop() Should be called after response is read. If this is not called, we get that
-    //annoying unknown ssl error
-    client.stop();
+    int conn = client.connect(serverUri, serverPort);
+    bool reqSucceeded;
+    if (conn == 1)
+    {
 
+        reqSucceeded = Send(reqType, fullEndPoint, client, json, includeAccessToken, responseObj);
+        // client.stop() Should be called after response is read. If this is not called, we get that
+        // annoying unknown ssl error
+        client.stop();
+    }
     if (reqSucceeded)
         return true;
 
-    if (statusCode = 401)
+    if (responseObj.header.StatusCode == 401 || responseObj.header.StatusCode == 408)
     {
         json.clear();
-responseObj.jsonDictionary.clear();
-responseObj.header.ClearHeaders();
-        bool refreshSuccess = Send(RequestType::POST, "/auth/refresh", client, json, false,responseObj,true);
-
+        responseObj.jsonDictionary.clear();
+        responseObj.header.ClearHeaders();
+        conn = client.connect(serverUri, serverPort);
+        bool refreshSuccess;
+        if (conn == 1)
+        {
+            refreshSuccess = Send(RequestType::GET, "/auth/refresh", client, json, false, responseObj, true);
+            client.stop();
+        }
         if (refreshSuccess)
         {
-         Serial.println("Refresh success");
-            if (responseObj.jsonDictionary["token"] == "")
+            Serial.println("Refresh success");
+
+            String accessToken = ParseSetCookie(responseObj.header);
+            if (accessToken == "")
             {
-                Serial.println("Unable to retrieve ACCESS token value from json");
+                Serial.println("Unable to retrieve ACCESS token value from HEADERS");
                 return false;
             }
 
-            bool storedValue = storeSPIFFSValue(&responseObj.jsonDictionary);
+            std::map<String, String> myDict = {
+                {"token", accessToken}};
+            bool storedValue = storeSPIFFSValue(&myDict);
 
             if (storedValue)
             {
                 Serial.println("Stored access token");
                 return true;
+            }
+            else
+            {
+                Serial.println("Unable to store access token");
+                return false;
             }
             // Refresh token valid, Access token is good again, retry request
             bool attempt2Success = Send(reqType, fullEndPoint, client, json, includeAccessToken, responseObj);
