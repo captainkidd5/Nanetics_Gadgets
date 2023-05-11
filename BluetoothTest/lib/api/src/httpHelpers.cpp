@@ -34,9 +34,16 @@ String RequestTypeToString(RequestType r)
   }
 }
 
-void AppendHeader(WiFiClientSecure &client, String key, String value){
+void AppendHeader(RequestType reqType, WiFiClientSecure &client, String key, String value){
+
+if(reqType == RequestType::POST){
+client.print(key);
+client.println(value);
+return;
+}
 
 
+            Serial.println("Appending header... " + key + value);
             Serial.println("Appending header... " + key + value);
             client.println(key + value + "\r\n");
    
@@ -151,11 +158,16 @@ String ReadPlainText(WiFiClientSecure &client)
 {
   Serial.println("reading plaintext body...");
   String content = client.readStringUntil('\n');
+  Serial.println("content is before" + content);
   int contentLength = content.toInt();
+  Serial.println("content length is " + contentLength);
+
   int bytesRead = content.length() + 1; // add 1 for the '\n' character
   while (bytesRead < contentLength)
   {
     String line = client.readStringUntil('\n');
+  Serial.println("line:" + line);
+
     bytesRead += line.length() + 1; // add 1 for the '\n' character
     content += line;
   }

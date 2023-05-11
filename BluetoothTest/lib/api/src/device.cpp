@@ -50,13 +50,13 @@ void PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
 
   const String FullEndPoint = BaseEndPoint + "/RegistrationRequest";
 
-  json.clear();
   // Get the MAC address as a string
   String macAddress = String(ESP.getEfuseMac());
   // Convert the string to a ulong
   unsigned long long macAddressUlong = strtoull(macAddress.c_str(), NULL, 16);
   // Add the MAC address as a ulong to the JSON object
-  json["deviceHardWareId"] = 0;
+  json.clear();
+  json["deviceHardWareId"] = "343242323";
 
   bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, responseObj,true);
 

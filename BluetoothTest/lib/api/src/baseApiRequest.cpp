@@ -12,12 +12,20 @@ void SendJsonPayload(String payload,
 {
     size_t sizeT = serializeJson(json, payload);
     String size = String(sizeT);
+  
 
     client.print("Content-Length: ");
     Serial.println("Content length is " + size);
-    client.println(payload.length());
+
+    Serial.println("Content length is " + payload.length());
+
+
+    client.println(sizeT);
+    //Empty line is necessary to separate headers from payload
     client.println();
     Serial.println("Sending payload...");
+
+
     Serial.print("Payload is " + payload);
     client.println(payload);
     Serial.println("...Sending Payload [DONE]");
@@ -52,7 +60,7 @@ bool Send(RequestType reqType, String fullEndPoint,
             {"token", ""}};
 
         if (retrieveSPIIFSValue(&myDict)){
-            AppendHeader(client, "Authorization: Bearer ", myDict["token"]);
+            AppendHeader(reqType,client, "Authorization: Bearer ", myDict["token"]);
 
         }
         else
@@ -69,23 +77,35 @@ bool Send(RequestType reqType, String fullEndPoint,
             {"refreshToken", ""}};
 
         if (retrieveSPIIFSValue(&myDict))
-            AppendHeader(client, "Cookie: refreshToken=", myDict["refreshToken"]);
+            AppendHeader(reqType, client, "Cookie: refreshToken=", myDict["refreshToken"]);
         else
             Serial.println("Unable to retrieve refresh token value");
     }
-    client.println(F("Connection: close"));
 
     if (!json.isNull())
     {
         SendJsonPayload(payload, client, json);
     }
+    client.println(F("Connection: close"));
+
     // client.flush() ensures all data is sent to the server. Should be called after all desired data is sent
     // but before the response is read
     client.flush();
     Headers headers = ParseHeaders(client);
 
     responseObj.header = headers;
+
+
+    if(responseObj.header.ContentType == CustomContentType::PlainText){
+        Serial.println("Content type was plain text");
+        ReadPlainText(client);
+    }
+    else if(responseObj.header.ContentType == CustomContentType::JSON){
+        Serial.println("Content type was Json");
+
     GetJsonDictionary(client, json, responseObj.jsonDictionary);
+
+    }
 
     if (!isSuccessCode(headers.StatusCode))
     {

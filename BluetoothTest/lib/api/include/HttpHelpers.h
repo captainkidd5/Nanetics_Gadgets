@@ -21,7 +21,7 @@ enum class RequestType{
 
 extern String s_refreshToken;
 String ParseSetCookie(Headers &headers);
-void AppendHeader(WiFiClientSecure &client, String key, String value);
+void AppendHeader(RequestType reqType, WiFiClientSecure &client, String key, String value);
 String RequestTypeToString(RequestType r);
 void GetJsonDictionary(WiFiClientSecure &client, DynamicJsonDocument &json, std::map<String, String>& myDict);
 bool isSuccessCode(int statusCode);

@@ -14,6 +14,7 @@
 WiFiClientSecure wifiClient;
 DynamicJsonDocument json(1024);
 
+
 void setup()
 {
 
@@ -30,8 +31,10 @@ void setup()
 
   if (!isRegistered)
   {
+DynamicJsonDocument json2(1024);
+
     Serial.println("Device not registered, attempting to register");
-    PostRegisterDevice(wifiClient, json);
+    PostRegisterDevice(wifiClient, json2);
   }
   hasWifiCredentials = true;
 

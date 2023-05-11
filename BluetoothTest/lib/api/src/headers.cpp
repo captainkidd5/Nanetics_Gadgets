@@ -63,7 +63,7 @@ void Headers::ParseHeaders(WiFiClientSecure &client)
     Serial.print("...");
 
     String line = client.readStringUntil('\n');
-
+Serial.println(line);
     if (line == "\r")
     {
       Serial.println("Response headers received");
@@ -72,8 +72,9 @@ void Headers::ParseHeaders(WiFiClientSecure &client)
     if (line.startsWith("HTTP/1."))
       StatusCode = ParseStatusCode(line);
 
-    else if (line.startsWith("Content-Type:"))
+    else if (line.startsWith("Content-Type:")){
       ContentType = ParseContentType(line);
+    }
 
     else
     {
