@@ -20,7 +20,7 @@ bool GetIsRegistered(WiFiClientSecure &client, DynamicJsonDocument &json)
 
   json.clear();
 
-  bool success = SendRequest(RequestType::GET, FullEndPoint, client, json, responseObj, true);
+  bool success = SendRequest(RequestType::GET, FullEndPoint, client, json, responseObj);
 
   if (responseObj.jsonDictionary["isRegistered"] == "")
   {
@@ -56,12 +56,15 @@ void PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
   // Convert the string to a ulong
   unsigned long long macAddressUlong = strtoull(macAddress.c_str(), NULL, 16);
   // Add the MAC address as a ulong to the JSON object
-  json["deviceHardWareId"] = 45430;
+  json["deviceHardWareId"] = 0;
 
-  bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, responseObj);
+  bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, responseObj,true);
 
   if (success)
   {
     Serial.println("Device registered");
+  }
+  else{
+    Serial.println("Unable to register device");
   }
 }

@@ -5,7 +5,6 @@
 #include "Helpers.h"
 #include "Headers.h"
 #include "ResponseObject.h"
-const byte _maxFailedAttempts = 7;
 
 // Sends a json payload in the body of the http request
 void SendJsonPayload(String payload,
@@ -52,14 +51,16 @@ bool Send(RequestType reqType, String fullEndPoint,
         std::map<String, String> myDict = {
             {"token", ""}};
 
-        if (retrieveSPIIFSValue(&myDict))
+        if (retrieveSPIIFSValue(&myDict)){
             AppendHeader(client, "Authorization: Bearer ", myDict["token"]);
+
+        }
         else
         {
             Serial.println("Unable to retrieve access token value");
-responseObj.header.StatusCode = 401;
-client.flush();
-return false;
+            responseObj.header.StatusCode = 401;
+            client.flush();
+            return false;
         }
     }
     if (includeRefreshToken)
@@ -105,7 +106,6 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
                  WiFiClientSecure &client, DynamicJsonDocument &json,
                  ResponseObject &responseObj, bool includeAccessToken = true)
 {
-    byte _failedAttempts = 0;
 
     int conn = client.connect(serverUri, serverPort);
     bool reqSucceeded;
@@ -122,14 +122,17 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
 
     if (responseObj.header.StatusCode == 401 || responseObj.header.StatusCode == 408)
     {
-        json.clear();
+        // create a new json doc here because the original request will need to retain
+        // its json data if it is a post request with a body
+        DynamicJsonDocument j2(1024);
+
         responseObj.jsonDictionary.clear();
         responseObj.header.ClearHeaders();
         conn = client.connect(serverUri, serverPort);
         bool refreshSuccess;
         if (conn == 1)
         {
-            refreshSuccess = Send(RequestType::GET, "/auth/refresh", client, json, false, responseObj, true);
+            refreshSuccess = Send(RequestType::GET, "/auth/refresh", client, j2, false, responseObj, true);
             client.stop();
         }
         if (refreshSuccess)
@@ -158,7 +161,7 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
             }
 
             // Refresh token valid, Access token is good again, retry request
-            json.clear();
+            j2.clear();
             responseObj.jsonDictionary.clear();
             responseObj.header.ClearHeaders();
             conn = client.connect(serverUri, serverPort);
@@ -168,7 +171,7 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
                 Serial.println("Reattempting request at endpoint " + fullEndPoint);
                 bool attempt2Success = Send(reqType, fullEndPoint, client, json, includeAccessToken, responseObj);
                 Serial.println("Reattempting request: " + attempt2Success);
-            client.stop();
+                client.stop();
 
                 return attempt2Success;
             }

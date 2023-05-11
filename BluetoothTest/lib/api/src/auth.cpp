@@ -22,7 +22,6 @@ bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json, String email
 
   json["email"] = email;
   json["password"] = passWord;
-  // Do not send refresh token with login request, because we don't have one yet
   bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, responseObj, false);
 
   if (!success)

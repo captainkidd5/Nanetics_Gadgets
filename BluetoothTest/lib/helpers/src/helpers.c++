@@ -27,10 +27,10 @@ bool retrieveSPIIFSValue(std::map<String, String>* dict)
   {
     if (SPIFFS.exists("/config.json"))
     {
-      Serial.println("...Mounting FS [DONE]");
+      //Serial.println("...Mounting FS [DONE]");
 
       //  file exists, reading and loading
-      Serial.println("reading config file");
+      //Serial.println("reading config file");
       File configFile = SPIFFS.open("/config.json", "r");
       if (configFile)
       {
@@ -46,7 +46,7 @@ bool retrieveSPIIFSValue(std::map<String, String>* dict)
        // serializeJson(json, Serial);
         if (!deserializeError)
         {
-          Serial.println("\nparsed json");
+          //Serial.println("\nparsed json");
           for (auto& element : *dict) {
             String key = element.first;
             if (json.containsKey(key)) {
