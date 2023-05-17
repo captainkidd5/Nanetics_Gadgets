@@ -1,4 +1,0 @@
-
-
-void setupIotConnection();
-void IotLoop();

@@ -11,16 +11,16 @@
 #include "HttpHelpers.h"
 #include "Helpers.h"
 #include "Auth.h"
-const bool shouldWipeFileSystemOnBoot = true;
-const bool shouldWipeWifiCredentialsOnBoot = true;
+const bool shouldWipeFileSystemOnBoot = false;
+const bool shouldWipeWifiCredentialsOnBoot = false;
 // custom parameters with validation: https://github.com/tzapu/WiFiManager/issues/736
 //  define your default values here, if there are different values in config.json, they are overwritten.
-char email[48] = "waiikipomm@gmail.com";
-char password[48] = "Runescape1!";
+char email[48] = "email@gmail.com";
+char password[48] = "PASSWORD";
 
 // flag for saving data
-bool shouldSaveConfig = false;
-bool hasWifiCredentials = false;
+bool shouldSaveConfig = true;
+bool hasWifiCredentials = true;
 
 // callback notifying us of the need to save config
 void saveConfigCallback()
@@ -115,7 +115,12 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
     if (retrievedSPIIFS)
       s_refreshToken = myDict["token"];
     else
-      Serial.println("Unable to retrieve refresh token");
+    {
+      Serial.println("Unable to retrieve refresh token from spiffs (wificonnectioncustom.cpp)");
+      Serial.println("Resetting wifi settings...");
+    wifiManager.resetSettings();
+
+    }
   }
   else
   {
@@ -138,7 +143,16 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
 
     }
   }
+char ssid[48];
+char wifiPass[48];
 
+  strcpy(ssid, WiFi.SSID().c_str());
+  strcpy(wifiPass, WiFi.psk().c_str());
+  //store wifi ssid and password for iot hub usage.
+   std::map<String, String> wifiDict = {
+        {"ssid", ssid},
+        {"wifiPass",wifiPass}};
+  storeSPIFFSValue(&wifiDict);
   Serial.println("local ip");
   Serial.println(WiFi.localIP());
 }

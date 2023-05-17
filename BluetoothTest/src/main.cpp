@@ -4,12 +4,14 @@
 #include <ArduinoJson.hpp>
 #include <WifiConnectionCustom.h>
 #include <WiFiClientSecure.h>
-#include <azureIotConnection.h>
+#include "azureIotConnection.h"
 #include <Preferences.h>
 // #include <ServerConnection.h>
 
 #include "ServerConnection.h"
 #include "Device.h"
+
+#include "SoilSensor.h"
 
 WiFiClientSecure wifiClient;
 DynamicJsonDocument json(1024);
@@ -37,7 +39,8 @@ DynamicJsonDocument json2(1024);
     PostRegisterDevice(wifiClient, json2);
   }
   hasWifiCredentials = true;
-
+  setupIoT();
+Serial.println("Device is setup. Begin Sensing...");
   // setupIotConnection();
 }
 
@@ -46,11 +49,11 @@ void loop()
 
   if (hasWifiCredentials)
   {
-
+    senseLoop();
     // ApiLoop(wifiClient, json);
-    //  IotLoop();
+      loopIoT();
   }
-  delay(1000);
+  delay(4000);
 
   // put your main code here, to run repeatedly:
 }

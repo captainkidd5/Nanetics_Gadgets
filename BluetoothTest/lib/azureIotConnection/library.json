@@ -1,0 +1,7 @@
+{
+    "name": "azureIoTConnection",
+    "build": {
+        "srcDir": "src",
+        "include": "include"
+    }
+}
