@@ -1,5 +1,4 @@
 #include <ArduinoJson.h>
-#include <ArduinoJson.hpp>
 #include <WiFiClientSecure.h>
 #include <map>
 #include <Arduino.h>

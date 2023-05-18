@@ -8,11 +8,10 @@
   #include <SPIFFS.h>
 #endif
 
-#include <ArduinoJson.h>    
 #include "HttpHelpers.h"
 
 extern bool hasWifiCredentials;
-void setupWifi(WiFiClientSecure &client,DynamicJsonDocument &json);
+void setupWifi(WiFiClientSecure &client);
 
 
 #endif // _SETUPWIFI_H

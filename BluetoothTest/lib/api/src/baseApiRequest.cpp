@@ -1,5 +1,4 @@
 
-#include <ArduinoJson.hpp>
 #include <WiFiClientSecure.h>
 #include "HttpHelpers.h"
 #include "Helpers.h"
@@ -8,9 +7,9 @@
 
 // Sends a json payload in the body of the http request
 void SendJsonPayload(String payload,
-                     WiFiClientSecure &client, DynamicJsonDocument &json)
+                     WiFiClientSecure &client)
 {
-    size_t sizeT = serializeJson(json, payload);
+    size_t sizeT = serializeJson(s_jsonDoc, payload);
     String size = String(sizeT);
   
 
@@ -29,11 +28,11 @@ void SendJsonPayload(String payload,
     Serial.print("Payload is " + payload);
     client.println(payload);
     Serial.println("...Sending Payload [DONE]");
-    json.clear();
+    s_jsonDoc.clear();
 }
 
 bool Send(RequestType reqType, String fullEndPoint,
-          WiFiClientSecure &client, DynamicJsonDocument &json, bool includeAccessToken, ResponseObject &responseObj, bool includeRefreshToken = false)
+          WiFiClientSecure &client, bool includeAccessToken, ResponseObject &responseObj, bool includeRefreshToken = false)
 {
 
     Serial.println("");
@@ -82,9 +81,9 @@ bool Send(RequestType reqType, String fullEndPoint,
             Serial.println("Unable to retrieve refresh token value");
     }
 
-    if (!json.isNull())
+    if (!s_jsonDoc.isNull())
     {
-        SendJsonPayload(payload, client, json);
+        SendJsonPayload(payload, client);
     }
     client.println(F("Connection: close"));
 
@@ -103,7 +102,7 @@ bool Send(RequestType reqType, String fullEndPoint,
     else if(responseObj.header.ContentType == CustomContentType::JSON){
         Serial.println("Content type was Json");
 
-    GetJsonDictionary(client, json, responseObj.jsonDictionary);
+    GetJsonDictionary(client, responseObj.jsonDictionary);
 
     }
 
@@ -123,7 +122,7 @@ bool Send(RequestType reqType, String fullEndPoint,
 }
 
 bool SendRequest(RequestType reqType, String fullEndPoint,
-                 WiFiClientSecure &client, DynamicJsonDocument &json,
+                 WiFiClientSecure &client,
                  ResponseObject &responseObj, bool includeAccessToken = true)
 {
 
@@ -132,7 +131,7 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
     if (conn == 1)
     {
 
-        reqSucceeded = Send(reqType, fullEndPoint, client, json, includeAccessToken, responseObj);
+        reqSucceeded = Send(reqType, fullEndPoint, client, includeAccessToken, responseObj);
         // client.stop() Should be called after response is read. If this is not called, we get that
         // annoying unknown ssl error
         client.stop();
@@ -152,7 +151,7 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
         bool refreshSuccess;
         if (conn == 1)
         {
-            refreshSuccess = Send(RequestType::GET, "/auth/refresh", client, j2, false, responseObj, true);
+            refreshSuccess = Send(RequestType::GET, "/auth/refresh", client,  false, responseObj, true);
             client.stop();
         }
         if (refreshSuccess)
@@ -189,7 +188,7 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
             if (conn == 1)
             {
                 Serial.println("Reattempting request at endpoint " + fullEndPoint);
-                bool attempt2Success = Send(reqType, fullEndPoint, client, json, includeAccessToken, responseObj);
+                bool attempt2Success = Send(reqType, fullEndPoint, client, includeAccessToken, responseObj);
                 Serial.println("Reattempting request: " + attempt2Success);
                 client.stop();
 

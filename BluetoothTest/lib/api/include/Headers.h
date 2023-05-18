@@ -3,7 +3,6 @@
 #include <Arduino.h>
 
 #include <ArduinoJson.h>
-#include <ArduinoJson.hpp>
 #include <WiFiClientSecure.h>
 #include <map>
 

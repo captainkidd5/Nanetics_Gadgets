@@ -5,17 +5,17 @@
 
 
 
-extern std::string IOT_CONFIG_WIFI_SSID;
-extern std::string IOT_CONFIG_WIFI_PASSWORD;
+extern char* IOT_CONFIG_WIFI_SSID;
+extern char* IOT_CONFIG_WIFI_PASSWORD;
 // DHT. 
 // Change the DHT_PIN to the pin you are using.
 #define DHT_TYPE DHT11
 #define DHT_PIN 14
 
 // Azure IoT Central
-#define DPS_ID_SCOPE                      "YOUR_ID_SCOPE"
-#define IOT_CONFIG_DEVICE_ID              "YOUR_DEVICE_ID"
-#define IOT_CONFIG_DEVICE_KEY             "YOUR_DEVICE_KEY"
+#define DPS_ID_SCOPE                      "0ne00A24B76"
+#define IOT_CONFIG_DEVICE_ID              "soil_sensorv2"
+#define IOT_CONFIG_DEVICE_KEY             "oMVnAiimkrVLrHbZvOtybNeA6ICABdl7rUNkwMbVXiA="
 
 // User-agent (url-encoded) provided by the MQTT client to Azure IoT Services.
 // When developing for your own Arduino-based platform,
@@ -23,7 +23,7 @@ extern std::string IOT_CONFIG_WIFI_PASSWORD;
 #define AZURE_SDK_CLIENT_USER_AGENT       "c%2F" AZ_SDK_VERSION_STRING "(ard%3Besp32)"
 
 // Publish 1 message every 2 seconds.
-#define TELEMETRY_FREQUENCY_IN_SECONDS    2
+#define TELEMETRY_FREQUENCY_IN_SECONDS    30
 
 // For how long the MQTT password (SAS token) is valid, in minutes.
 // After that, the sample automatically generates a new password and re-connects.

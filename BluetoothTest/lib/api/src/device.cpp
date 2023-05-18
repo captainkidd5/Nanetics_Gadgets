@@ -1,5 +1,4 @@
 #include <ArduinoJson.h>
-#include <ArduinoJson.hpp>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <ESPmDNS.h>
@@ -12,7 +11,7 @@
 #include "ResponseObject.h"
 const String BaseEndPoint = "/devices";
 
-bool GetIsRegistered(WiFiClientSecure &client, DynamicJsonDocument &json)
+bool GetIsRegistered(WiFiClientSecure &client)
 {
   ResponseObject responseObj;
   String macAddress = String(ESP.getEfuseMac());
@@ -20,9 +19,9 @@ bool GetIsRegistered(WiFiClientSecure &client, DynamicJsonDocument &json)
 
   const String FullEndPoint = BaseEndPoint + "/isRegistered?hardwareId=" + macAddressUlong;
 
-  json.clear();
+  s_jsonDoc.clear();
 
-  bool success = SendRequest(RequestType::GET, FullEndPoint, client, json, responseObj);
+  bool success = SendRequest(RequestType::GET, FullEndPoint, client, responseObj);
 
   if (responseObj.jsonDictionary["isRegistered"] == "")
   {
@@ -31,7 +30,6 @@ bool GetIsRegistered(WiFiClientSecure &client, DynamicJsonDocument &json)
   }
   else if (responseObj.jsonDictionary["isRegistered"] == "false")
   {
-    // Serial.println("Not registered!");
     return false;
   }
   else if (responseObj.jsonDictionary["isRegistered"] == "true")
@@ -39,14 +37,11 @@ bool GetIsRegistered(WiFiClientSecure &client, DynamicJsonDocument &json)
     Serial.println("IS registered!");
     return true;
   }
-  else
-  {
-    Serial.println("Uhhh" + responseObj.jsonDictionary["isRegistered"]);
-  }
+
 
   return false;
 }
-void PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
+void PostRegisterDevice(WiFiClientSecure &client)
 {
   ResponseObject responseObj;
 
@@ -57,10 +52,10 @@ void PostRegisterDevice(WiFiClientSecure &client, DynamicJsonDocument &json)
   // Convert the string to a ulong
   unsigned long long macAddressUlong = strtoull(macAddress.c_str(), NULL, 16);
   // Add the MAC address as a ulong to the JSON object
-  json.clear();
-  json["deviceHardWareId"] = macAddressUlong;
+  s_jsonDoc.clear();
+  s_jsonDoc["deviceHardWareId"] = macAddressUlong;
 
-  bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, responseObj, true);
+  bool success = SendRequest(RequestType::POST, FullEndPoint, client, responseObj, true);
 
   if (success)
   {

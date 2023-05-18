@@ -1,12 +1,6 @@
 #include <FS.h>          //this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> //https://github.com/tzapu/WiFiManager
-
-#ifdef ESP32
 #include <SPIFFS.h>
-#endif
-
-#include <ArduinoJson.h>
-#include <ArduinoJson.hpp>
 
 #include "HttpHelpers.h"
 #include "Helpers.h"
@@ -15,8 +9,8 @@ const bool shouldWipeFileSystemOnBoot = false;
 const bool shouldWipeWifiCredentialsOnBoot = false;
 // custom parameters with validation: https://github.com/tzapu/WiFiManager/issues/736
 //  define your default values here, if there are different values in config.json, they are overwritten.
-char email[48] = "email@gmail.com";
-char password[48] = "PASSWORD";
+char email[48] = "waiikipomm@gmail.com";
+char password[48] = "Runescape1!";
 
 // flag for saving data
 bool shouldSaveConfig = true;
@@ -30,7 +24,7 @@ void saveConfigCallback()
   shouldSaveConfig = true;
 }
 
-void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
+void setupWifi(WiFiClientSecure &client)
 {
   WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
 
@@ -97,10 +91,9 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
 
   strcpy(email, e_mail.getValue());
   strcpy(password, pass_word.getValue());
-  String usrnm = email;
-  String psword = password;
 
-  if (usrnm == "email@gmail.com" && psword == "PASSWORD")
+
+  if (email == "email@gmail.com" && password == "PASSWORD")
   {
     // we autoconnected so the default values were not changed,
     // we should assume that we have a refresh token now.
@@ -132,26 +125,21 @@ void setupWifi(WiFiClientSecure &client, DynamicJsonDocument &json)
       delay(1200);
   client.setTimeout(30000);
 
-      bool loginSuccess = PostLogin(client, json, usrnm, psword);
+      bool loginSuccess = PostLogin(client, email, password);
       if (loginSuccess)
         Serial.println("Successfully logged in and stored refresh token.");
       else
         Serial.println("Problem logged in and stored refresh token.");
-
-
-
 
     }
   }
 char ssid[48];
 char wifiPass[48];
 
-  strcpy(ssid, WiFi.SSID().c_str());
-  strcpy(wifiPass, WiFi.psk().c_str());
   //store wifi ssid and password for iot hub usage.
    std::map<String, String> wifiDict = {
-        {"ssid", ssid},
-        {"wifiPass",wifiPass}};
+        {"ssid", WiFi.SSID().c_str()},
+        {"wifiPass",WiFi.psk().c_str()}};
   storeSPIFFSValue(&wifiDict);
   Serial.println("local ip");
   Serial.println(WiFi.localIP());

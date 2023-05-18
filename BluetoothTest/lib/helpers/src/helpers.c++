@@ -7,7 +7,12 @@
 #include <map>
 
 Preferences preferences;
+// Define the global StaticJsonDocument
+StaticJsonDocument<1024> s_jsonDoc;
 
+void setupJsonDoc(){
+  s_jsonDoc.clear();
+}
 // Create an instance of the Preferences library
 void printAvailableMemory()
 {
@@ -41,7 +46,7 @@ bool retrieveSPIIFSValue(std::map<String, String>* dict)
 
         configFile.readBytes(buf.get(), size);
 
-        DynamicJsonDocument json(1024);
+        StaticJsonDocument<1024> json;
         auto deserializeError = deserializeJson(json, buf.get());
        // serializeJson(json, Serial);
         if (!deserializeError)
@@ -79,7 +84,7 @@ bool storeSPIFFSValue(std::map<String, String>* dict)
   {
     Serial.println("...Mounting FS [DONE]");
 
-    DynamicJsonDocument json(1024);
+    StaticJsonDocument<1024> json;
     for (auto& element : *dict) {
       String key = element.first;
       String value = element.second;

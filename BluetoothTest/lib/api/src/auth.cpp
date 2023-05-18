@@ -1,5 +1,3 @@
-#include <ArduinoJson.h>
-#include <ArduinoJson.hpp>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <ESPmDNS.h>
@@ -12,17 +10,17 @@
 
 const String BaseEndPoint = "/auth";
 
-bool PostLogin(WiFiClientSecure &client, DynamicJsonDocument &json, String email, String passWord)
+bool PostLogin(WiFiClientSecure &client, String email, String passWord)
 {
   ResponseObject responseObj;
 
   const String FullEndPoint = BaseEndPoint + "/login";
 
-  json.clear();
+  s_jsonDoc.clear();
 
-  json["email"] = email;
-  json["password"] = passWord;
-  bool success = SendRequest(RequestType::POST, FullEndPoint, client, json, responseObj, false);
+  s_jsonDoc["email"] = email;
+  s_jsonDoc["password"] = passWord;
+  bool success = SendRequest(RequestType::POST, FullEndPoint, client, responseObj, false);
 
   if (!success)
     return false;
