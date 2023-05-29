@@ -77,7 +77,7 @@ void PostRegisterDevice(WiFiClientSecure &client)
       s_primaryKey = responseObj.jsonDictionary["primaryKey"];
      s_scope_id = responseObj.jsonDictionary["idScope"];
 
-    Serial.println("s_primary key is " + s_primaryKey);
+   // Serial.println("s_primary key is " + s_primaryKey);
 
 
   }

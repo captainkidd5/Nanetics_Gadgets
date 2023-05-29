@@ -36,13 +36,13 @@ bool PostLogin(WiFiClientSecure &client, String email, String passWord)
   // Store refresh token in file system
   storeSPIFFSValue(&myDict);
 
-  std::map<String, String> myDict2{
-  {"refreshToken",""}
-  };
+  // std::map<String, String> myDict2{
+  // {"refreshToken",""}
+  // };
 
-  retrieveSPIIFSValue(&myDict2);
+  // retrieveSPIIFSValue(&myDict2);
 
-  Serial.println("Stored refresh token is " + myDict2["refreshToken"]);
+  // Serial.println("Stored refresh token is " + myDict2["refreshToken"]);
 
   return true;
 

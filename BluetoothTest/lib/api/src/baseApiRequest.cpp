@@ -20,11 +20,11 @@ void SendJsonPayload(String payload,
     client.println(sizeT);
     // Empty line is necessary to separate headers from payload
     client.println();
-    Serial.println("Sending payload...");
+    //Serial.println("Sending payload...");
 
-    Serial.print("Payload is " + payload);
+    //Serial.print("Payload is " + payload);
     client.println(payload);
-    Serial.println("...Sending Payload [DONE]");
+    //Serial.println("...Sending Payload [DONE]");
     //jsonDoc.clear();
 }
 
@@ -52,12 +52,12 @@ bool Send(RequestType reqType, String fullEndPoint,
 
     if (includeAccessToken)
     {
-        std::map<String, String> myDict = {
-            {"token", ""}};
 
-        if (retrieveSPIIFSValue(&myDict))
+
+        if (s_accessToken != "")
         {
-            AppendHeader(reqType, client, "Authorization: Bearer ", myDict["token"]);
+            //Serial.println("access token is: " + s_accessToken);
+            AppendHeader(reqType, client, "Authorization: Bearer ", s_accessToken);
         }
         else
         {
@@ -160,20 +160,8 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
                 Serial.println("Unable to retrieve ACCESS token value from HEADERS");
                 return false;
             }
-
-            std::map<String, String> myDict = {
-                {"token", accessToken}};
-            bool storedValue = storeSPIFFSValue(&myDict);
-
-            if (storedValue)
-            {
-                Serial.println("Stored access token");
-            }
-            else
-            {
-                Serial.println("Unable to store access token");
-                return false;
-            }
+s_accessToken = accessToken;
+         
 
             // Refresh token valid, Access token is good again, retry request
             responseObj.jsonDictionary.clear();

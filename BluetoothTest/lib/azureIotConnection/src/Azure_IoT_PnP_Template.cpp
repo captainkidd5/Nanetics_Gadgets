@@ -301,13 +301,15 @@ static int generate_device_info_payload(az_iot_hub_client const* hub_client, uin
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_TOTAL_MEMORY_PROPERTY_VALUE to payload. ");
 
 
+if (s_setupEmail != nullptr && strlen(s_setupEmail) != 0) {
 ////////////
   rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("user"));
+
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding user to payload.");
-  Serial.println("user email value is " + String(s_setupEmail));
+
   rc = az_json_writer_append_string(&jw,az_span_create_from_str(s_setupEmail));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_TOTAL_MEMORY_PROPERTY_VALUE to payload. ");
-
+}
 //////////////
 
 ////////////

@@ -43,8 +43,8 @@ void AppendHeader(RequestType reqType, WiFiClientSecure &client, String key, Str
     return;
   }
 
-  Serial.println("Appending header... " + key + value);
-  Serial.println("Appending header... " + key + value);
+  //Serial.println("Appending header... " + key + value);
+
   client.println(key + value + "\r\n");
 }
 
@@ -107,7 +107,7 @@ void GetJsonDictionary(WiFiClientSecure &client, std::map<String, String> &myDic
       myDict[key] = value;
     }
 
-    Serial.println("Json Key:" + key + " value:" + myDict[key]);
+    //Serial.println("Json Key:" + key + " value:" + myDict[key]);
   }
 }
 
@@ -139,14 +139,14 @@ String ParseSetCookie(Headers &headers)
   int end = setCookieVal.indexOf(';');       // Find the end index of the token value
 
   value = setCookieVal.substring(start, end);
-  Serial.println("Parsed token is " + value);
+  //Serial.println("Parsed token is " + value);
   return value;
 }
 String ReadPlainText(WiFiClientSecure &client)
 {
   Serial.println("reading plaintext body...");
   String content = client.readStringUntil('\n');
-  Serial.println("content is before" + content);
+  //Serial.println("content is before" + content);
   int contentLength = content.toInt();
   Serial.println("content length is " + contentLength);
 
@@ -154,11 +154,11 @@ String ReadPlainText(WiFiClientSecure &client)
   while (bytesRead < contentLength)
   {
     String line = client.readStringUntil('\n');
-    Serial.println("line:" + line);
+    //Serial.println("line:" + line);
 
     bytesRead += line.length() + 1; // add 1 for the '\n' character
     content += line;
   }
-  Serial.println("Content body: " + content);
+  //Serial.println("Content body: " + content);
   return content;
 }

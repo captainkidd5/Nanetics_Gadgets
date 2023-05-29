@@ -349,7 +349,7 @@ void setupIoT()
   #else
     azure_iot_config.device_certificate = AZ_SPAN_EMPTY;
     azure_iot_config.device_certificate_private_key = AZ_SPAN_EMPTY;
-    Serial.println("s_primary key is " + s_primaryKey);
+    //Serial.println("s_primary key is " + s_primaryKey);
     azure_iot_config.device_key = az_span_create_from_str((char*)s_primaryKey.c_str());
   #endif // IOT_CONFIG_USE_X509_CERT
   azure_iot_config.dps_id_scope = az_span_create_from_str((char*)s_scope_id.c_str());
@@ -373,10 +373,8 @@ void setupIoT()
   azure_iot_config.on_properties_update_completed = on_properties_update_completed;
   azure_iot_config.on_properties_received = on_properties_received;
   azure_iot_config.on_command_request_received = on_command_request_received;
-Serial.println("6");
 
   azure_iot_init(&azure_iot, &azure_iot_config);
-Serial.println("7");
 
   azure_iot_start(&azure_iot);
 

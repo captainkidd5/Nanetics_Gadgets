@@ -5,8 +5,8 @@
 #include "HttpHelpers.h"
 #include "Helpers.h"
 #include "Auth.h"
-const bool shouldWipeFileSystemOnBoot = true;
-const bool shouldWipeWifiCredentialsOnBoot = true;
+const bool shouldWipeFileSystemOnBoot = false;
+const bool shouldWipeWifiCredentialsOnBoot = false;
 // custom parameters with validation: https://github.com/tzapu/WiFiManager/issues/736
 //  define your default values here, if there are different values in config.json, they are overwritten.
 char email[48] = "email@gmail.com";

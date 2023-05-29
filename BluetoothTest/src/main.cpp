@@ -24,7 +24,7 @@ void setup()
 //wifiClient.setNoDelay(true);
   setupWifi(wifiClient);
   bool isRegistered = GetIsRegistered(wifiClient);
-Serial.println("(main0) assigned id is " + String(s_assigned_id));
+//Serial.println("(main0) assigned id is " + String(s_assigned_id));
 
 
   delay(2500);
@@ -37,7 +37,7 @@ Serial.println("(main0) assigned id is " + String(s_assigned_id));
     isRegistered = GetIsRegistered(wifiClient);
   }
   hasWifiCredentials = true;
-Serial.println("(main) assigned id is " + String(s_assigned_id));
+//Serial.println("(main) assigned id is " + String(s_assigned_id));
 
   setupIoT();
 Serial.println("Device is setup. Begin Sensing...");

@@ -15,6 +15,7 @@ char* s_setupEmail;
 String s_assigned_id;
 String s_scope_id;
 String s_primaryKey;
+String s_accessToken;
 
 
 
@@ -48,9 +49,9 @@ bool retrieveSPIIFSValue(std::map<String, String>* dict)
       File configFile = SPIFFS.open("/config.json", "r");
       if (configFile)
       {
-        Serial.println("opened config file");
+       // Serial.println("opened config file");
         size_t size = configFile.size();
-        Serial.println("Size of config file is " + String(size));
+        //Serial.println("Size of config file is " + String(size));
         // Allocate a buffer to store contents of the file.
         std::unique_ptr<char[]> buf(new char[size]);
 
@@ -58,7 +59,7 @@ bool retrieveSPIIFSValue(std::map<String, String>* dict)
 
         StaticJsonDocument<2048> json;
         auto deserializeError = deserializeJson(json, buf.get());
-          serializeJsonPretty(json, Serial); // Print JSON contents to Serial monitor
+          //serializeJsonPretty(json, Serial); // Print JSON contents to Serial monitor
 
        // serializeJson(json, Serial);
         if (!deserializeError)

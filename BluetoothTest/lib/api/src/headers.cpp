@@ -56,10 +56,10 @@ void Headers::ParseHeaders(WiFiClientSecure &client)
   delay(1500);
   while (client.connected())
   {
-    Serial.print("...");
+   // Serial.print("...");
 
     String line = client.readStringUntil('\n');
-Serial.println(line);
+//Serial.println(line);
     if (line == "\r")
     {
       // Serial.println("Response headers received");
