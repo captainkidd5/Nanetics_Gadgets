@@ -6,7 +6,7 @@
 #include "IoTMain.h"
 #include <Preferences.h>
 #include "Device.h"
-
+#include "Helpers.h"
 
 WiFiClientSecure wifiClient;
 
@@ -24,6 +24,9 @@ void setup()
 //wifiClient.setNoDelay(true);
   setupWifi(wifiClient);
   bool isRegistered = GetIsRegistered(wifiClient);
+Serial.println("(main0) assigned id is " + String(s_assigned_id));
+
+
   delay(2500);
 
   if (!isRegistered)
@@ -31,8 +34,11 @@ void setup()
 
     Serial.println("Device not registered, attempting to register");
     PostRegisterDevice(wifiClient);
+    isRegistered = GetIsRegistered(wifiClient);
   }
   hasWifiCredentials = true;
+Serial.println("(main) assigned id is " + String(s_assigned_id));
+
   setupIoT();
 Serial.println("Device is setup. Begin Sensing...");
   // setupIotConnection();

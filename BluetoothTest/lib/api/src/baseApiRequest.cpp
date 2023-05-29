@@ -7,32 +7,29 @@
 
 // Sends a json payload in the body of the http request
 void SendJsonPayload(String payload,
-                     WiFiClientSecure &client)
+                     WiFiClientSecure &client,const StaticJsonDocument<1024> &jsonDoc)
 {
-    size_t sizeT = serializeJson(s_jsonDoc, payload);
+    size_t sizeT = serializeJson(jsonDoc, payload);
     String size = String(sizeT);
-  
 
     client.print("Content-Length: ");
     Serial.println("Content length is " + size);
 
     Serial.println("Content length is " + payload.length());
 
-
     client.println(sizeT);
-    //Empty line is necessary to separate headers from payload
+    // Empty line is necessary to separate headers from payload
     client.println();
     Serial.println("Sending payload...");
-
 
     Serial.print("Payload is " + payload);
     client.println(payload);
     Serial.println("...Sending Payload [DONE]");
-    s_jsonDoc.clear();
+    //jsonDoc.clear();
 }
 
 bool Send(RequestType reqType, String fullEndPoint,
-          WiFiClientSecure &client, bool includeAccessToken, ResponseObject &responseObj, bool includeRefreshToken = false)
+          WiFiClientSecure &client, bool includeAccessToken,const StaticJsonDocument<1024> &jsonDoc, ResponseObject &responseObj, bool includeRefreshToken = false)
 {
 
     Serial.println("");
@@ -58,9 +55,9 @@ bool Send(RequestType reqType, String fullEndPoint,
         std::map<String, String> myDict = {
             {"token", ""}};
 
-        if (retrieveSPIIFSValue(&myDict)){
-            AppendHeader(reqType,client, "Authorization: Bearer ", myDict["token"]);
-
+        if (retrieveSPIIFSValue(&myDict))
+        {
+            AppendHeader(reqType, client, "Authorization: Bearer ", myDict["token"]);
         }
         else
         {
@@ -78,12 +75,12 @@ bool Send(RequestType reqType, String fullEndPoint,
         if (retrieveSPIIFSValue(&myDict))
             AppendHeader(reqType, client, "Cookie: refreshToken=", myDict["refreshToken"]);
         else
-            Serial.println("Unable to retrieve refresh token value");
+            Serial.println("Unable to retrieve refresh token value (if includeRefreshToken)");
     }
 
-    if (!s_jsonDoc.isNull())
+    if (!jsonDoc.isNull())
     {
-        SendJsonPayload(payload, client);
+        SendJsonPayload(payload, client, jsonDoc);
     }
     client.println(F("Connection: close"));
 
@@ -94,16 +91,16 @@ bool Send(RequestType reqType, String fullEndPoint,
 
     responseObj.header = headers;
 
-
-    if(responseObj.header.ContentType == CustomContentType::PlainText){
+    if (responseObj.header.ContentType == CustomContentType::PlainText)
+    {
         Serial.println("Content type was plain text");
         ReadPlainText(client);
     }
-    else if(responseObj.header.ContentType == CustomContentType::JSON){
+    else if (responseObj.header.ContentType == CustomContentType::JSON)
+    {
         Serial.println("Content type was Json");
 
-    GetJsonDictionary(client, responseObj.jsonDictionary);
-
+        GetJsonDictionary(client, responseObj.jsonDictionary);
     }
 
     if (!isSuccessCode(headers.StatusCode))
@@ -122,7 +119,7 @@ bool Send(RequestType reqType, String fullEndPoint,
 }
 
 bool SendRequest(RequestType reqType, String fullEndPoint,
-                 WiFiClientSecure &client,
+                 WiFiClientSecure &client,const StaticJsonDocument<1024> &jsonDoc,
                  ResponseObject &responseObj, bool includeAccessToken = true)
 {
 
@@ -131,7 +128,7 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
     if (conn == 1)
     {
 
-        reqSucceeded = Send(reqType, fullEndPoint, client, includeAccessToken, responseObj);
+        reqSucceeded = Send(reqType, fullEndPoint, client, includeAccessToken, jsonDoc, responseObj);
         // client.stop() Should be called after response is read. If this is not called, we get that
         // annoying unknown ssl error
         client.stop();
@@ -143,15 +140,14 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
     {
         // create a new json doc here because the original request will need to retain
         // its json data if it is a post request with a body
-        DynamicJsonDocument j2(1024);
-
+        const StaticJsonDocument<1024> j2;
         responseObj.jsonDictionary.clear();
         responseObj.header.ClearHeaders();
         conn = client.connect(serverUri, serverPort);
         bool refreshSuccess;
         if (conn == 1)
         {
-            refreshSuccess = Send(RequestType::GET, "/auth/refresh", client,  false, responseObj, true);
+            refreshSuccess = Send(RequestType::GET, "/auth/refresh", client, false, j2, responseObj, true);
             client.stop();
         }
         if (refreshSuccess)
@@ -180,7 +176,6 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
             }
 
             // Refresh token valid, Access token is good again, retry request
-            j2.clear();
             responseObj.jsonDictionary.clear();
             responseObj.header.ClearHeaders();
             conn = client.connect(serverUri, serverPort);
@@ -188,7 +183,7 @@ bool SendRequest(RequestType reqType, String fullEndPoint,
             if (conn == 1)
             {
                 Serial.println("Reattempting request at endpoint " + fullEndPoint);
-                bool attempt2Success = Send(reqType, fullEndPoint, client, includeAccessToken, responseObj);
+                bool attempt2Success = Send(reqType, fullEndPoint, client, includeAccessToken, jsonDoc, responseObj);
                 Serial.println("Reattempting request: " + attempt2Success);
                 client.stop();
 

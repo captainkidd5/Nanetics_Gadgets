@@ -5,12 +5,12 @@
 #include "HttpHelpers.h"
 #include "Helpers.h"
 #include "Auth.h"
-const bool shouldWipeFileSystemOnBoot = false;
-const bool shouldWipeWifiCredentialsOnBoot = false;
+const bool shouldWipeFileSystemOnBoot = true;
+const bool shouldWipeWifiCredentialsOnBoot = true;
 // custom parameters with validation: https://github.com/tzapu/WiFiManager/issues/736
 //  define your default values here, if there are different values in config.json, they are overwritten.
-char email[48] = "waiikipomm@gmail.com";
-char password[48] = "Runescape1!";
+char email[48] = "email@gmail.com";
+char password[48] = "password";
 
 // flag for saving data
 bool shouldSaveConfig = true;
@@ -35,6 +35,7 @@ void setupWifi(WiFiClientSecure &client)
     SPIFFS.format();
     Serial.println("...Wiping FS [DONE]");
   }
+
 
   //   // The extra parameters to be configured (can be either global or just in the setup)
   //   // After connecting, parameter.getValue() will get you the configured value
@@ -92,18 +93,17 @@ void setupWifi(WiFiClientSecure &client)
   strcpy(email, e_mail.getValue());
   strcpy(password, pass_word.getValue());
 
-
-  if (email == "email@gmail.com" && password == "PASSWORD")
+  if (strcmp(email, "email@gmail.com") == 0 && strcmp(password, "password")==0)
   {
     // we autoconnected so the default values were not changed,
     // we should assume that we have a refresh token now.
 
     //   // read configuration from FS json
+
     Serial.println("Mounting FS...");
     std::map<String, String> myDict = {
         {"token", ""}};
     bool retrievedSPIIFS = retrieveSPIIFSValue(&myDict);
-
 
     if (retrievedSPIIFS)
       s_refreshToken = myDict["token"];
@@ -111,36 +111,40 @@ void setupWifi(WiFiClientSecure &client)
     {
       Serial.println("Unable to retrieve refresh token from spiffs (wificonnectioncustom.cpp)");
       Serial.println("Resetting wifi settings...");
-    wifiManager.resetSettings();
-
+      wifiManager.resetSettings();
     }
+
+    Serial.println("Refresh token is " + s_refreshToken);
   }
   else
   {
     // else we need to send our username and password to auth login endpoint and grab
     // the refresh token
-
     if (WiFi.status() == WL_CONNECTED)
     {
       delay(1200);
-  client.setTimeout(30000);
-
+      client.setTimeout(30000);
+      s_setupEmail = email;
       bool loginSuccess = PostLogin(client, email, password);
       if (loginSuccess)
         Serial.println("Successfully logged in and stored refresh token.");
       else
         Serial.println("Problem logged in and stored refresh token.");
 
+//Reset values to default after logging in for security reasons
+e_mail.setValue("email@gmail.com",15);
+pass_word.setValue("password",8);
+
     }
   }
-char ssid[48];
-char wifiPass[48];
+  char ssid[48];
+  char wifiPass[48];
 
-  //store wifi ssid and password for iot hub usage.
-   std::map<String, String> wifiDict = {
-        {"ssid", WiFi.SSID().c_str()},
-        {"wifiPass",WiFi.psk().c_str()}};
-  storeSPIFFSValue(&wifiDict);
+  // store wifi ssid and password for iot hub usage.
+  std::map<String, String> wifiDict = {
+      {"ssid", WiFi.SSID().c_str()},
+      {"wifiPass", WiFi.psk().c_str()}};
+  // storeSPIFFSValue(&wifiDict);
   Serial.println("local ip");
   Serial.println(WiFi.localIP());
 }

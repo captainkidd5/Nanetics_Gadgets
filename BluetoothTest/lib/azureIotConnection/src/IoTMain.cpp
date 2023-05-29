@@ -329,7 +329,6 @@ void setupIoT()
   sync_device_clock_with_ntp_server();
 
   azure_pnp_init();
-
   /* 
    * The configuration structure used by Azure IoT must remain unchanged (including data buffer) 
    * throughout the lifetime of the sample. This variable must also not lose context so other
@@ -341,6 +340,8 @@ void setupIoT()
   azure_iot_config.iot_hub_fqdn = AZ_SPAN_EMPTY;
   azure_iot_config.device_id = AZ_SPAN_EMPTY;
 
+
+
   #ifdef IOT_CONFIG_USE_X509_CERT
     azure_iot_config.device_certificate = AZ_SPAN_FROM_STR(IOT_CONFIG_DEVICE_CERT);
     azure_iot_config.device_certificate_private_key = AZ_SPAN_FROM_STR(IOT_CONFIG_DEVICE_CERT_PRIVATE_KEY);
@@ -348,12 +349,19 @@ void setupIoT()
   #else
     azure_iot_config.device_certificate = AZ_SPAN_EMPTY;
     azure_iot_config.device_certificate_private_key = AZ_SPAN_EMPTY;
-    azure_iot_config.device_key = AZ_SPAN_FROM_STR(IOT_CONFIG_DEVICE_KEY);
+    Serial.println("s_primary key is " + s_primaryKey);
+    azure_iot_config.device_key = az_span_create_from_str((char*)s_primaryKey.c_str());
   #endif // IOT_CONFIG_USE_X509_CERT
+  azure_iot_config.dps_id_scope = az_span_create_from_str((char*)s_scope_id.c_str());
 
-  azure_iot_config.dps_id_scope = AZ_SPAN_FROM_STR(DPS_ID_SCOPE);
-  azure_iot_config.dps_registration_id = AZ_SPAN_FROM_STR(IOT_CONFIG_DEVICE_ID); // Use Device ID for Azure IoT Central.
+//////////
+//Serial.println("assigned id for IoT registration is " + String(s_assigned_id));
+  azure_iot_config.dps_registration_id = az_span_create_from_str((char*)s_assigned_id.c_str()); // Use Device ID for Azure IoT Central.
+
+///////////////
+
   azure_iot_config.data_buffer = AZ_SPAN_FROM_BUFFER(az_iot_data_buffer);
+  
   azure_iot_config.sas_token_lifetime_in_minutes = MQTT_PASSWORD_LIFETIME_IN_MINUTES;
   azure_iot_config.mqtt_client_interface.mqtt_client_init = mqtt_client_init_function;
   azure_iot_config.mqtt_client_interface.mqtt_client_deinit = mqtt_client_deinit_function;
@@ -365,8 +373,11 @@ void setupIoT()
   azure_iot_config.on_properties_update_completed = on_properties_update_completed;
   azure_iot_config.on_properties_received = on_properties_received;
   azure_iot_config.on_command_request_received = on_command_request_received;
+Serial.println("6");
 
   azure_iot_init(&azure_iot, &azure_iot_config);
+Serial.println("7");
+
   azure_iot_start(&azure_iot);
 
   LogInfo("Azure IoT client initialized (state=%d)", azure_iot.state);

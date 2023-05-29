@@ -14,13 +14,10 @@ String Headers::GetHeader(String key) const
 {
   auto it = HeadersMap.find(key);
   if (it != HeadersMap.end())
-  {
     return it->second;
-  }
   else
-  {
     return "";
-  }
+  
 }
 
 int ParseStatusCode(String line)
@@ -65,7 +62,7 @@ void Headers::ParseHeaders(WiFiClientSecure &client)
 Serial.println(line);
     if (line == "\r")
     {
-      Serial.println("Response headers received");
+      // Serial.println("Response headers received");
       return;
     }
     if (line.startsWith("HTTP/1."))
@@ -98,13 +95,13 @@ Serial.println(line);
     }
   }
 
-  for (const auto &pair : HeadersMap)
-  {
+  // for (const auto &pair : HeadersMap)
+  // {
 
-    Serial.print(pair.first);
-    Serial.print(": ");
-    Serial.println(pair.second);
-  }
+  //   Serial.print(pair.first);
+  //   Serial.print(": ");
+  //   Serial.println(pair.second);
+  // }
 
-  Serial.println("...Parsing headers [DONE]");
+  // Serial.println("...Parsing headers [DONE]");
 }

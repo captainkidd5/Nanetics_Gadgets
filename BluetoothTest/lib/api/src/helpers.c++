@@ -10,6 +10,14 @@ Preferences preferences;
 // Define the global StaticJsonDocument
 StaticJsonDocument<1024> s_jsonDoc;
 
+//Used only on device registration as a global variable for IoT central
+char* s_setupEmail;
+String s_assigned_id;
+String s_scope_id;
+String s_primaryKey;
+
+
+
 void setupJsonDoc(){
   s_jsonDoc.clear();
 }
@@ -30,6 +38,7 @@ bool retrieveSPIIFSValue(std::map<String, String>* dict)
   bool returnVal = false;
   if (SPIFFS.begin())
   {
+    
     if (SPIFFS.exists("/config.json"))
     {
       //Serial.println("...Mounting FS [DONE]");
@@ -41,13 +50,16 @@ bool retrieveSPIIFSValue(std::map<String, String>* dict)
       {
         Serial.println("opened config file");
         size_t size = configFile.size();
+        Serial.println("Size of config file is " + String(size));
         // Allocate a buffer to store contents of the file.
         std::unique_ptr<char[]> buf(new char[size]);
 
         configFile.readBytes(buf.get(), size);
 
-        StaticJsonDocument<1024> json;
+        StaticJsonDocument<2048> json;
         auto deserializeError = deserializeJson(json, buf.get());
+          serializeJsonPretty(json, Serial); // Print JSON contents to Serial monitor
+
        // serializeJson(json, Serial);
         if (!deserializeError)
         {
@@ -74,17 +86,19 @@ bool retrieveSPIIFSValue(std::map<String, String>* dict)
       Serial.println("...Failed to mount FS");
     }
   }
+  if(!returnVal)
+    Serial.println("Unable to retrieve spiffs value");
   return returnVal;
 }
 
 bool storeSPIFFSValue(std::map<String, String>* dict)
 {
   bool returnVal = false;
-  if (SPIFFS.begin())
+  if (SPIFFS.begin(true))
   {
     Serial.println("...Mounting FS [DONE]");
 
-    StaticJsonDocument<1024> json;
+    StaticJsonDocument<2048> json;
     for (auto& element : *dict) {
       String key = element.first;
       String value = element.second;
@@ -107,5 +121,7 @@ bool storeSPIFFSValue(std::map<String, String>* dict)
   {
     Serial.println("...Failed to mount FS");
   }
+  if(!returnVal)
+    Serial.println("Unable to store spiffsssss");
   return returnVal;
 }

@@ -20,7 +20,7 @@ bool PostLogin(WiFiClientSecure &client, String email, String passWord)
 
   s_jsonDoc["email"] = email;
   s_jsonDoc["password"] = passWord;
-  bool success = SendRequest(RequestType::POST, FullEndPoint, client, responseObj, false);
+  bool success = SendRequest(RequestType::POST, FullEndPoint, client, s_jsonDoc, responseObj, false);
 
   if (!success)
     return false;
@@ -35,9 +35,14 @@ bool PostLogin(WiFiClientSecure &client, String email, String passWord)
   myDict["refreshToken"] = rToken;
   // Store refresh token in file system
   storeSPIFFSValue(&myDict);
-  retrieveSPIIFSValue(&myDict);
 
-  Serial.println("Stored refresh token is " + myDict["refreshToken"]);
+  std::map<String, String> myDict2{
+  {"refreshToken",""}
+  };
+
+  retrieveSPIIFSValue(&myDict2);
+
+  Serial.println("Stored refresh token is " + myDict2["refreshToken"]);
 
   return true;
 

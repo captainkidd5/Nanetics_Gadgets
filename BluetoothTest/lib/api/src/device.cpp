@@ -15,13 +15,14 @@ bool GetIsRegistered(WiFiClientSecure &client)
 {
   ResponseObject responseObj;
   String macAddress = String(ESP.getEfuseMac());
-  unsigned long long macAddressUlong = strtoull(macAddress.c_str(), NULL, 16);
+  Serial.println("mac address is " + macAddress);
+ // unsigned long macAddressUlong = strtoull(macAddress.c_str(), NULL, 16);
 
-  const String FullEndPoint = BaseEndPoint + "/isRegistered?hardwareId=" + macAddressUlong;
+  const String FullEndPoint = BaseEndPoint + "/isRegistered?hardwareId=" + macAddress;
 
   s_jsonDoc.clear();
 
-  bool success = SendRequest(RequestType::GET, FullEndPoint, client, responseObj);
+  bool success = SendRequest(RequestType::GET, FullEndPoint, client,s_jsonDoc, responseObj);
 
   if (responseObj.jsonDictionary["isRegistered"] == "")
   {
@@ -35,6 +36,15 @@ bool GetIsRegistered(WiFiClientSecure &client)
   else if (responseObj.jsonDictionary["isRegistered"] == "true")
   {
     Serial.println("IS registered!");
+    Serial.println("HAS assignedId of " + responseObj.jsonDictionary["assignedId"]);
+
+
+   s_assigned_id = responseObj.jsonDictionary["assignedId"];
+     s_primaryKey = responseObj.jsonDictionary["primaryKey"];
+     s_scope_id = responseObj.jsonDictionary["idScope"];
+
+    //Serial.println("s_primary key is " + s_primaryKey);
+
     return true;
   }
 
@@ -49,37 +59,29 @@ void PostRegisterDevice(WiFiClientSecure &client)
 
   // Get the MAC address as a string
   String macAddress = String(ESP.getEfuseMac());
-  // Convert the string to a ulong
-  unsigned long long macAddressUlong = strtoull(macAddress.c_str(), NULL, 16);
   // Add the MAC address as a ulong to the JSON object
   s_jsonDoc.clear();
-  s_jsonDoc["deviceHardWareId"] = macAddressUlong;
+  s_jsonDoc["deviceHardWareId"] = macAddress;
 
-  bool success = SendRequest(RequestType::POST, FullEndPoint, client, responseObj, true);
 
-  if (success)
+  if (SendRequest(RequestType::POST, FullEndPoint, client,s_jsonDoc, responseObj, true))
   {
     Serial.println("Device registered");
-    std::map<String, String> myDict;
-    String x509Thumbprint = responseObj.header.GetHeader("x509Thumbprint");
-    if (x509Thumbprint == "")
-    {
-      Serial.println("Unable to retrieve x509 thumbprint");
-    }
-    String assignedId = responseObj.header.GetHeader("assignedId");
-    if (assignedId == "")
-    {
-      Serial.println("Unable to retrieve assignedId");
-    }
+ if (responseObj.jsonDictionary["assignedId"] == "")
+  {
+    Serial.println("No value found for is registered");
+  }
+  else 
+  {
+      s_assigned_id = responseObj.jsonDictionary["assignedId"];
+      s_primaryKey = responseObj.jsonDictionary["primaryKey"];
+     s_scope_id = responseObj.jsonDictionary["idScope"];
 
-    myDict["x509Thumbprint"] = x509Thumbprint;
-    myDict["assignedId"] = assignedId;
+    Serial.println("s_primary key is " + s_primaryKey);
 
-    storeSPIFFSValue(&myDict);
-    retrieveSPIIFSValue(&myDict);
 
-    Serial.println("Stored x509Thumbprint token is " + myDict["x509Thumbprint"]);
-    Serial.println("Stored assignedId token is " + myDict["assignedId"]);
+  }
+
   }
   else
   {

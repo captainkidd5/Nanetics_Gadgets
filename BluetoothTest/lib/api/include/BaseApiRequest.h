@@ -6,7 +6,7 @@
 #include "ResponseObject.h"
 
 bool SendRequest(RequestType reqType, String fullEndPoint,
-                 WiFiClientSecure &client,
+                 WiFiClientSecure &client,const StaticJsonDocument<1024> &jsonDoc,
                  ResponseObject &responseObj, bool includeAccessToken = true);
 
  #endif

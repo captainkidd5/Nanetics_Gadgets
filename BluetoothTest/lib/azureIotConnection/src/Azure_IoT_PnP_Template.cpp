@@ -12,6 +12,7 @@
 
 #include <az_precondition_internal.h>
 
+#include "Helpers.h"
 // For DHT sensor
 #include "iot_configs.h"
 #include "soilSensor.h"
@@ -21,12 +22,8 @@
 #define AZURE_PNP_MODEL_ID "dtmi:naneticsiot:devkit:freertos:Esp32NaneticsSoilSensor;1"
 
 #define SAMPLE_DEVICE_INFORMATION_NAME                 "deviceInformation"
-#define SAMPLE_MANUFACTURER_PROPERTY_NAME              "manufacturer"
 #define SAMPLE_MODEL_PROPERTY_NAME                     "model"
 #define SAMPLE_SOFTWARE_VERSION_PROPERTY_NAME          "swVersion"
-#define SAMPLE_OS_NAME_PROPERTY_NAME                   "osName"
-#define SAMPLE_PROCESSOR_ARCHITECTURE_PROPERTY_NAME    "processorArchitecture"
-#define SAMPLE_PROCESSOR_MANUFACTURER_PROPERTY_NAME    "processorManufacturer"
 #define SAMPLE_TOTAL_STORAGE_PROPERTY_NAME             "totalStorage"
 #define SAMPLE_TOTAL_MEMORY_PROPERTY_NAME              "totalMemory"
 
@@ -280,10 +277,7 @@ static int generate_device_info_payload(az_iot_hub_client const* hub_client, uin
     hub_client, &jw, AZ_SPAN_FROM_STR(SAMPLE_DEVICE_INFORMATION_NAME));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed writting component name.");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(SAMPLE_MANUFACTURER_PROPERTY_NAME));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_MANUFACTURER_PROPERTY_NAME to payload.");
-  rc = az_json_writer_append_string(&jw, AZ_SPAN_FROM_STR(SAMPLE_MANUFACTURER_PROPERTY_VALUE));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_MANUFACTURER_PROPERTY_VALUE to payload. ");
+
 
   rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(SAMPLE_MODEL_PROPERTY_NAME));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_MODEL_PROPERTY_NAME to payload.");
@@ -295,21 +289,7 @@ static int generate_device_info_payload(az_iot_hub_client const* hub_client, uin
   rc = az_json_writer_append_string(&jw, AZ_SPAN_FROM_STR(SAMPLE_VERSION_PROPERTY_VALUE));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_VERSION_PROPERTY_VALUE to payload. ");
 
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(SAMPLE_OS_NAME_PROPERTY_NAME));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_OS_NAME_PROPERTY_NAME to payload.");
-  rc = az_json_writer_append_string(&jw, AZ_SPAN_FROM_STR(SAMPLE_OS_NAME_PROPERTY_VALUE));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_OS_NAME_PROPERTY_VALUE to payload. ");
-
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(SAMPLE_PROCESSOR_ARCHITECTURE_PROPERTY_NAME));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_PROCESSOR_ARCHITECTURE_PROPERTY_NAME to payload.");
-  rc = az_json_writer_append_string(&jw, AZ_SPAN_FROM_STR(SAMPLE_ARCHITECTURE_PROPERTY_VALUE));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_ARCHITECTURE_PROPERTY_VALUE to payload. ");
-
-  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(SAMPLE_PROCESSOR_MANUFACTURER_PROPERTY_NAME));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_PROCESSOR_MANUFACTURER_PROPERTY_NAME to payload.");
-  rc = az_json_writer_append_string(&jw, AZ_SPAN_FROM_STR(SAMPLE_PROCESSOR_MANUFACTURER_PROPERTY_VALUE));
-  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_PROCESSOR_MANUFACTURER_PROPERTY_VALUE to payload. ");
-
+ 
   rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR(SAMPLE_TOTAL_STORAGE_PROPERTY_NAME));
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_TOTAL_STORAGE_PROPERTY_NAME to payload.");
   rc = az_json_writer_append_double(&jw, SAMPLE_TOTAL_STORAGE_PROPERTY_VALUE, DOUBLE_DECIMAL_PLACE_DIGITS);
@@ -319,6 +299,29 @@ static int generate_device_info_payload(az_iot_hub_client const* hub_client, uin
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_TOTAL_MEMORY_PROPERTY_NAME to payload.");
   rc = az_json_writer_append_double(&jw, SAMPLE_TOTAL_MEMORY_PROPERTY_VALUE, DOUBLE_DECIMAL_PLACE_DIGITS);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_TOTAL_MEMORY_PROPERTY_VALUE to payload. ");
+
+
+////////////
+  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("user"));
+  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding user to payload.");
+  Serial.println("user email value is " + String(s_setupEmail));
+  rc = az_json_writer_append_string(&jw,az_span_create_from_str(s_setupEmail));
+  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_TOTAL_MEMORY_PROPERTY_VALUE to payload. ");
+
+//////////////
+
+////////////
+  rc = az_json_writer_append_property_name(&jw, AZ_SPAN_FROM_STR("hardwareId"));
+  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding hardwareId to payload.");
+  
+  Serial.println("hardware id is " + String(ESP.getEfuseMac()));
+  rc = az_json_writer_append_double(&jw,(double)ESP.getEfuseMac(),DOUBLE_DECIMAL_PLACE_DIGITS);
+  EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed adding SAMPLE_TOTAL_MEMORY_PROPERTY_VALUE to payload. ");
+
+//////////////
+
+
+
 
   rc = az_iot_hub_client_properties_writer_end_component(hub_client, &jw);
   EXIT_IF_AZ_FAILED(rc, RESULT_ERROR, "Failed closing component object.");
