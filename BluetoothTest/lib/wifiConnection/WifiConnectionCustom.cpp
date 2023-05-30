@@ -27,7 +27,7 @@ void saveConfigCallback()
 void setupWifi(WiFiClientSecure &client)
 {
   WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
-
+printAvailableMemory();
   //   // clean FS, for testing
   if (shouldWipeFileSystemOnBoot)
   {
@@ -36,7 +36,8 @@ void setupWifi(WiFiClientSecure &client)
     Serial.println("...Wiping FS [DONE]");
   }
 
-
+  String _ssid = WiFi.SSID();
+  Serial.println("1_ssid is " + _ssid);
   //   // The extra parameters to be configured (can be either global or just in the setup)
   //   // After connecting, parameter.getValue() will get you the configured value
   WiFiManagerParameter e_mail("email", "Email", email, 48, "type=\"email\" required");
@@ -79,9 +80,11 @@ void setupWifi(WiFiClientSecure &client)
     Serial.println("...Failed to connect and hit timeout");
     delay(3000);
     //     // reset and try again, or maybe put it to deep sleep
-    // ESP.restart();
+     ESP.restart();
     delay(5000);
   }
+   _ssid = WiFi.SSID();
+  Serial.println("2_ssid is " + _ssid);
   client.setCACert(root_ca);
 
   hasWifiCredentials = true;
@@ -102,11 +105,11 @@ void setupWifi(WiFiClientSecure &client)
 
     Serial.println("Mounting FS...");
     std::map<String, String> myDict = {
-        {"token", ""}};
+        {"refreshToken", ""}};
     bool retrievedSPIIFS = retrieveSPIIFSValue(&myDict);
 
     if (retrievedSPIIFS)
-      s_refreshToken = myDict["token"];
+      s_refreshToken = myDict["refreshToken"];
     else
     {
       Serial.println("Unable to retrieve refresh token from spiffs (wificonnectioncustom.cpp)");

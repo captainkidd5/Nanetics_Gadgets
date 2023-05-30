@@ -38,10 +38,12 @@ void setup()
   }
   hasWifiCredentials = true;
 //Serial.println("(main) assigned id is " + String(s_assigned_id));
+  String _ssid = WiFi.SSID();
+  Serial.println("3_ssid is " + _ssid);
 
   setupIoT();
 Serial.println("Device is setup. Begin Sensing...");
-  // setupIotConnection();
+
 }
 
 void loop()
@@ -49,8 +51,7 @@ void loop()
 
   if (hasWifiCredentials)
   {
-   // senseLoop();
-    // ApiLoop(wifiClient, json);
+
       loopIoT();
   }
   delay(4000);

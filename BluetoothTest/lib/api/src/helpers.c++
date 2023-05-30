@@ -59,7 +59,7 @@ bool retrieveSPIIFSValue(std::map<String, String>* dict)
 
         StaticJsonDocument<2048> json;
         auto deserializeError = deserializeJson(json, buf.get());
-          //serializeJsonPretty(json, Serial); // Print JSON contents to Serial monitor
+          serializeJsonPretty(json, Serial); // Print JSON contents to Serial monitor
 
        // serializeJson(json, Serial);
         if (!deserializeError)
@@ -123,6 +123,6 @@ bool storeSPIFFSValue(std::map<String, String>* dict)
     Serial.println("...Failed to mount FS");
   }
   if(!returnVal)
-    Serial.println("Unable to store spiffsssss");
+    Serial.println("Unable to store spiffs");
   return returnVal;
 }
