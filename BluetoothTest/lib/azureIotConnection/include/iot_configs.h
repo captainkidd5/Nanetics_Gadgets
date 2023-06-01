@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 // Wifi
-
-
-
 extern char* IOT_CONFIG_WIFI_SSID;
 extern char* IOT_CONFIG_WIFI_PASSWORD;
 // DHT. 
@@ -13,9 +10,7 @@ extern char* IOT_CONFIG_WIFI_PASSWORD;
 #define DHT_PIN 14
 
 // Azure IoT Central
-//#define DPS_ID_SCOPE                      "0ne00A24B76"
-//#define IOT_CONFIG_DEVICE_ID              "d60db663-4feb-4f70-8568-1a6ef2b7be4b"
-//#define IOT_CONFIG_DEVICE_KEY             "IlWMHVZN4pW0EilqyIMWz1dgCE3mE56swwKoVt+u7+s="
+#define TEMPLATE_NAME                       "soil_sensorv2"
 
 // User-agent (url-encoded) provided by the MQTT client to Azure IoT Services.
 // When developing for your own Arduino-based platform,

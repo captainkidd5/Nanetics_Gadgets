@@ -9,6 +9,8 @@
 #include "Headers.h"
 #include "BaseApiRequest.h"
 #include "ResponseObject.h"
+#include "iot_configs.h"
+
 const String BaseEndPoint = "/devices";
 
 bool GetIsRegistered(WiFiClientSecure &client)
@@ -62,6 +64,7 @@ void PostRegisterDevice(WiFiClientSecure &client)
   // Add the MAC address as a ulong to the JSON object
   s_jsonDoc.clear();
   s_jsonDoc["deviceHardWareId"] = macAddress;
+  s_jsonDoc["templateName"] = TEMPLATE_NAME;
 
 
   if (SendRequest(RequestType::POST, FullEndPoint, client,s_jsonDoc, responseObj, true))
